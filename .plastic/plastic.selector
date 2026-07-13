@@ -1,0 +1,3 @@
+repository "FloatingIceSeal@tj_wechat_os_qy01pkfiz60mdgpatkrc6qkl4@cloud.cn"
+  path "/"
+    smartbranch "/main/program development"
