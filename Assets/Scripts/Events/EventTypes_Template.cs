@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 #region ========== 事件类型枚举定义 ==========
 
@@ -68,6 +69,13 @@ public enum EventType
 
     // ==================== 日志事件 ====================
     LOG_EVENT_ENTRY,                // 日志条目（配合 GameLogTypes 使用）
+
+    // ==================== 碰撞事件 ====================
+    COLLISION_EVENT_ON_ENTER,       // 物理碰撞事件
+    COLLISION_EVENT_ON_TRIGGER,     // 触发器碰撞事件
+
+    // ==================== 信息池事件 ====================
+    INFO_POOL_EVENT_ON_CHANGE,      // 信息池数据变更
 
     // ==================== 联网事件（可选） ====================
     // NETWORK_EVENT_ON_CONNECTED,
@@ -242,6 +250,23 @@ public class AudioEventArgs : GameEventBase
     {
         AudioName = audioName;
         Volume = volume;
+    }
+}
+
+// ==================== 碰撞事件参数 ====================
+
+/// <summary>触发器碰撞事件参数</summary>
+public class CollisionEventArgs : GameEventBase
+{
+    /// <summary>碰撞源对象</summary>
+    public GameObject Source { get; }
+    /// <summary>被碰撞对象</summary>
+    public GameObject Target { get; }
+
+    public CollisionEventArgs(GameObject source, GameObject target)
+    {
+        Source = source;
+        Target = target;
     }
 }
 

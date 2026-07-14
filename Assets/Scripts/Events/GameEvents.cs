@@ -37,6 +37,9 @@ public static class GameEvents
     /// <param name="evt">事件参数（需实现 IGameEvent）</param>
     public static void Publish(Enum eventType, IGameEvent evt)
     {
+
+        UnityEngine.Debug.Log($"[EventSystem] 事件类型: {eventType} | 事件参数: {evt}");
+
         GameEventHandler handlerCopy = null;
 
         lock (_lock)
