@@ -7,18 +7,9 @@ using UnityEngine;
 /// </summary>
 public class Seal : MonoBehaviour, ICollisionEventPublisher
 {
-    #region 氧气系统
+    #region 数据模型
 
-    private float OxygenValue;
-    public float OxygenValueProperty
-    {
-        get { return OxygenValue; }
-        private set
-        {
-            OxygenValue = value;
-        }
-    }
-    [SerializeField]public float OxygenMaxValue = 100f;
+    public SealModel Model { get; private set; }
 
     #endregion
 
@@ -65,7 +56,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
 
         if (bubble != null)
         {
-            OxygenValue = Mathf.Min(OxygenValue + bubble.oxygen, OxygenMaxValue);
+            Model.OxygenValue = Mathf.Min(Model.OxygenValue + bubble.oxygen, Model.OxygenMaxValue);
         }
     }
 
@@ -75,10 +66,17 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
 
     private void Awake()
     {
+        Model = GetComponent<SealModel>();
         LifeStateMachine = new LifeStateMachine(this);
         OxygenStateMachine = new OxygenStateMachine(this);
         EnvironmentStateMachine = new EnvironmentStateMachine(this);
         ActionStateMachine = new ActionStateMachine(this);
+    }
+
+    private void Start()
+    {
+        GameEvents.Publish(EventType.PLAYER_EVENT_ON_SPAWN,
+            new PlayerEventArgs(this.gameObject));
     }
 
     private void OnEnable()

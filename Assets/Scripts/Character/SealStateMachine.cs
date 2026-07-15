@@ -73,11 +73,16 @@ public class LifeStateMachine
 
 #region ========== 2. 氧气状态机 (OxygenStateMachine) ==========
 
-public enum OxygenState { OxygenSufficient, OxygenInsufficient, Suffocating }
+public enum OxygenState { OxygenFull, OxygenSufficient, OxygenInsufficient, OxygenCritical, Suffocating }
 
 public abstract class OxygenStateBase : SealState<OxygenStateMachine>
 {
     protected OxygenStateBase(Seal owner, OxygenStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class OxygenFullState : OxygenStateBase
+{
+    public OxygenFullState(Seal owner, OxygenStateMachine fsm) : base(owner, fsm) { }
 }
 
 public class OxygenSufficientState : OxygenStateBase
@@ -88,6 +93,11 @@ public class OxygenSufficientState : OxygenStateBase
 public class OxygenInsufficientState : OxygenStateBase
 {
     public OxygenInsufficientState(Seal owner, OxygenStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class OxygenCriticalState : OxygenStateBase
+{
+    public OxygenCriticalState(Seal owner, OxygenStateMachine fsm) : base(owner, fsm) { }
 }
 
 public class SuffocatingState : OxygenStateBase
@@ -102,15 +112,19 @@ public class OxygenStateMachine
     public OxygenState CurrentState { get; private set; }
     private OxygenStateBase currentLeafState;
 
+    public OxygenFullState OxygenFullState { get; }
     public OxygenSufficientState OxygenSufficientState { get; }
     public OxygenInsufficientState OxygenInsufficientState { get; }
+    public OxygenCriticalState OxygenCriticalState { get; }
     public SuffocatingState SuffocatingState { get; }
 
     public OxygenStateMachine(Seal owner)
     {
         this.owner = owner;
+        OxygenFullState = new OxygenFullState(owner, this);
         OxygenSufficientState = new OxygenSufficientState(owner, this);
         OxygenInsufficientState = new OxygenInsufficientState(owner, this);
+        OxygenCriticalState = new OxygenCriticalState(owner, this);
         SuffocatingState = new SuffocatingState(owner, this);
     }
 

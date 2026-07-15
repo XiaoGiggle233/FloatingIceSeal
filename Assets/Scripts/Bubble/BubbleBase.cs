@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public abstract class BubbleBase : MonoBehaviour, ICollisionEventPublisher
@@ -8,6 +9,10 @@ public abstract class BubbleBase : MonoBehaviour, ICollisionEventPublisher
     [SerializeField]public int oxygen;
     //上浮的速度
     [SerializeField]public float speed;
+
+    //泡泡破裂
+    [Button("Burst", ButtonSizes.Large)]
+    public abstract void Burst();
 
     #region 碰撞检测
 
@@ -38,6 +43,12 @@ public abstract class BubbleBase : MonoBehaviour, ICollisionEventPublisher
     #endregion
 
     #region Unity 生命周期
+
+    private void Start()
+    {
+        GameEvents.Publish(EventType.BUBBLE_EVENT_ON_SPAWN,
+            new BubbleBurstEventArgs(this.gameObject));
+    }
 
     private void OnEnable()
     {

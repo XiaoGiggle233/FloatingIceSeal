@@ -33,6 +33,8 @@ public enum EventType
     PLAYER_EVENT_ON_SPAWN,          // 玩家生成
     PLAYER_EVENT_ON_DEATH,          // 玩家死亡
     PLAYER_EVENT_ON_STATE_CHANGE,   // 玩家状态变化（如加速、无敌等）
+    PLAYER_EVENT_ON_DASH,           // 玩家冲刺
+    PLAYER_EVENT_ON_BLOW_BUBBLE,    // 玩家吐泡泡
 
     // ==================== UI 事件 ====================
     UI_EVENT_ON_PANEL_OPEN,         // UI 面板打开
@@ -73,6 +75,10 @@ public enum EventType
     // ==================== 碰撞事件 ====================
     COLLISION_EVENT_ON_ENTER,       // 物理碰撞事件
     COLLISION_EVENT_ON_TRIGGER,     // 触发器碰撞事件
+
+    // ==================== 泡泡事件 ====================
+    BUBBLE_EVENT_ON_SPAWN,          // 泡泡生成
+    BUBBLE_EVENT_ON_BURST,          // 泡泡破裂
 
     // ==================== 信息池事件 ====================
     INFO_POOL_EVENT_ON_CHANGE,      // 信息池数据变更
@@ -267,6 +273,20 @@ public class CollisionEventArgs : GameEventBase
     {
         Source = source;
         Target = target;
+    }
+}
+
+// ==================== 泡泡事件参数 ====================
+
+/// <summary>泡泡破裂事件参数</summary>
+public class BubbleBurstEventArgs : GameEventBase
+{
+    /// <summary>破裂的泡泡对象</summary>
+    public GameObject Bubble { get; }
+
+    public BubbleBurstEventArgs(GameObject bubble)
+    {
+        Bubble = bubble;
     }
 }
 

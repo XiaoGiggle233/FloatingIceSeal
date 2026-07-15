@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// 全局信息池
@@ -26,9 +27,13 @@ public static class InformationPool
 
         _pool[key] = value;
 
-        var type = existed ? InfoPoolEventArgs.ChangeType.Set : InfoPoolEventArgs.ChangeType.Set;
+        if (existed)
+            Debug.Log($"InformationPool: Set {key} = {value} (was: {oldValue})");
+        else
+            Debug.Log($"InformationPool: Set {key} = {value}");
+
         GameEvents.Publish(EventType.INFO_POOL_EVENT_ON_CHANGE,
-            new InfoPoolEventArgs(key, oldValue, value, type));
+            new InfoPoolEventArgs(key, oldValue, value, InfoPoolEventArgs.ChangeType.Set));
     }
 
     #endregion
@@ -82,6 +87,7 @@ public static class InformationPool
         if (_pool.TryGetValue(key, out object oldValue))
         {
             _pool.Remove(key);
+            Debug.Log($"InformationPool: Remove {key} (was: {oldValue})");
             GameEvents.Publish(EventType.INFO_POOL_EVENT_ON_CHANGE,
                 new InfoPoolEventArgs(key, oldValue, null, InfoPoolEventArgs.ChangeType.Remove));
             return true;
@@ -92,6 +98,7 @@ public static class InformationPool
     /// <summary>清空所有信息</summary>
     public static void Clear()
     {
+        Debug.Log("InformationPool: Clear");
         _pool.Clear();
         GameEvents.Publish(EventType.INFO_POOL_EVENT_ON_CHANGE,
             new InfoPoolEventArgs(InfoPoolEventArgs.ChangeType.Clear));
