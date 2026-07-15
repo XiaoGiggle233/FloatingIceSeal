@@ -37,6 +37,7 @@ public class XxxStateMachine
     // Update() / FixedUpdate() 委托给 currentLeafState
     // EnterLeafState(newState) 执行状态转换
     // SetState(state) 设置枚举值
+    // IsXxx() 判断当前状态（每个枚举值对应一个方法）
 }
 ```
 
@@ -126,5 +127,6 @@ fsm.EnterLeafState(fsm.NewStateState);
 - 抽象基类名以 `XxxStateBase` 命名
 - 状态机类的 public 属性命名与类名一致（如 `AliveState` → `AliveState`）
 - 所有状态类构造函数签名统一：`(Seal owner, XxxStateMachine fsm)`
-- 添加新状态后，检查 `Seal.cs` 的 `Awake()` 中是否需要在初始状态设置中体现
+- 添加新状态后，为枚举中每个新值添加对应的 `IsXxx()` 判断方法
+- 检查 `Seal.cs` 的 `Awake()` 中是否需要在初始状态设置中体现
 - 跨状态机协作时，在状态方法中通过 `owner.XxxStateMachine` 访问其他状态机

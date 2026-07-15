@@ -18,6 +18,7 @@ public class SealMoveController : MonoBehaviour
 
     private Seal seal;
     private SealModel model;
+    private SealOxygenController oxygenController;
     private Rigidbody2D rb;
 
     private Vector2 currentVelocity;
@@ -28,13 +29,14 @@ public class SealMoveController : MonoBehaviour
     {
         seal = GetComponent<Seal>();
         model = GetComponent<SealModel>();
+        oxygenController = GetComponent<SealOxygenController>();
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f; // 自行管理重力逻辑
     }
 
     private void Update()
     {
-        if (!IsAlive()) return;
+        if (!seal.LifeStateMachine.IsAlive()) return;
 
         if (isDashing)
         {
@@ -53,7 +55,7 @@ public class SealMoveController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!IsAlive()) return;
+        if (!seal.LifeStateMachine.IsAlive()) return;
 
         Vector2 targetVelocity;
         if (isDashing)
@@ -84,7 +86,7 @@ public class SealMoveController : MonoBehaviour
             input.x = 1f;
 
         // 仅水中允许上下移动
-        if (IsInWater())
+        if (seal.EnvironmentStateMachine.IsInWater())
         {
             if (Input.GetKey(moveUpKey) || Input.GetKey(KeyCode.UpArrow))
                 input.y = 1f;
@@ -92,14 +94,18 @@ public class SealMoveController : MonoBehaviour
                 input.y = -1f;
         }
 
+        // 归一化，保证斜向速度与正向一致
+        if (input.sqrMagnitude > 1f)
+            input.Normalize();
+
         return input;
     }
 
     private void HandleDash(Vector2 input)
     {
-        if (Input.GetKeyDown(dashKey) && IsInWater())
+        if (Input.GetKeyDown(dashKey) && seal.EnvironmentStateMachine.IsInWater())
         {
-            // 检查氧气是否足够
+            // 检!oxygenController.HasEnoughOxygen(model.DashOxygenCost)
             if (model.OxygenValue < model.DashOxygenCost) return;
 
             // 确定冲刺方向：有输入则用输入方向，否则用当前朝向
@@ -120,9 +126,9 @@ public class SealMoveController : MonoBehaviour
         // 更新动作状态
         if (input.sqrMagnitude > 0.01f)
         {
-            if (IsInWater())
+            if (seal.EnvironmentStateMachine.IsInWater())
                 seal.ActionStateMachine.SetState(ActionState.InWaterMoving);
-            else if (IsOnLand())
+            else if (seal.EnvironmentStateMachine.IsOnLand())
                 seal.ActionStateMachine.SetState(ActionState.OnLandMoving);
         }
         else
@@ -133,8 +139,8 @@ public class SealMoveController : MonoBehaviour
 
     private float GetCurrentMoveSpeed()
     {
-        if (IsInWater()) return model.WaterMoveSpeed;
-        if (IsOnLand()) return model.LandMoveSpeed;
+        if (seal.EnvironmentStateMachine.IsInWater()) return model.WaterMoveSpeed;
+        if (seal.EnvironmentStateMachine.IsOnLand()) return model.LandMoveSpeed;
         return model.AirMoveSpeed;
     }
 
@@ -144,7 +150,7 @@ public class SealMoveController : MonoBehaviour
 
     private void StartDash(Vector2 direction)
     {
-        model.OxygenValue -= model.DashOxygenCost;
+        oxygenController.ConsumeOxygen(model.DashOxygenCost);
         isDashing = true;
         dashTimer = model.DashDistance / model.DashSpeed;
         currentVelocity = direction * model.DashSpeed;
@@ -159,25 +165,6 @@ public class SealMoveController : MonoBehaviour
         dashTimer = 0f;
         currentVelocity = Vector2.zero;
         seal.ActionStateMachine.SetState(ActionState.Idle);
-    }
-
-    #endregion
-
-    #region 状态查询
-
-    private bool IsAlive()
-    {
-        return seal.LifeStateMachine.CurrentState == LifeState.Alive;
-    }
-
-    private bool IsInWater()
-    {
-        return seal.EnvironmentStateMachine.CurrentState == EnvironmentState.InWater;
-    }
-
-    private bool IsOnLand()
-    {
-        return seal.EnvironmentStateMachine.CurrentState == EnvironmentState.OnLand;
     }
 
     #endregion

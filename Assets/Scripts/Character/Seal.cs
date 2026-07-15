@@ -13,6 +13,12 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
 
     #endregion
 
+    #region 控制器
+
+    public SealOxygenController OxygenController { get; private set; }
+
+    #endregion
+
     #region 状态机
 
     public LifeStateMachine LifeStateMachine { get; private set; }
@@ -56,7 +62,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
 
         if (bubble != null)
         {
-            Model.OxygenValue = Mathf.Min(Model.OxygenValue + bubble.oxygen, Model.OxygenMaxValue);
+            OxygenController.RecoverOxygen(bubble.oxygen);
         }
     }
 
@@ -67,6 +73,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
     private void Awake()
     {
         Model = GetComponent<SealModel>();
+        OxygenController = GetComponent<SealOxygenController>();
         LifeStateMachine = new LifeStateMachine(this);
         OxygenStateMachine = new OxygenStateMachine(this);
         EnvironmentStateMachine = new EnvironmentStateMachine(this);
@@ -75,6 +82,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
 
     private void Start()
     {
+        InformationPool.Set("Seal", this);
         GameEvents.Publish(EventType.PLAYER_EVENT_ON_SPAWN,
             new PlayerEventArgs(this.gameObject));
     }

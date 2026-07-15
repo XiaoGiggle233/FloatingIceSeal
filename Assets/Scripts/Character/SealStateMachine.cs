@@ -67,6 +67,9 @@ public class LifeStateMachine
     }
 
     public void SetState(LifeState state) => CurrentState = state;
+
+    public bool IsAlive() => CurrentState == LifeState.Alive;
+    public bool IsDead() => CurrentState == LifeState.Dead;
 }
 
 #endregion
@@ -140,6 +143,12 @@ public class OxygenStateMachine
     }
 
     public void SetState(OxygenState state) => CurrentState = state;
+
+    public bool IsOxygenFull() => CurrentState == OxygenState.OxygenFull;
+    public bool IsOxygenSufficient() => CurrentState == OxygenState.OxygenSufficient;
+    public bool IsOxygenInsufficient() => CurrentState == OxygenState.OxygenInsufficient;
+    public bool IsOxygenCritical() => CurrentState == OxygenState.OxygenCritical;
+    public bool IsSuffocating() => CurrentState == OxygenState.Suffocating;
 }
 
 #endregion
@@ -199,6 +208,10 @@ public class EnvironmentStateMachine
     }
 
     public void SetState(EnvironmentState state) => CurrentState = state;
+
+    public bool IsInAir() => CurrentState == EnvironmentState.InAir;
+    public bool IsOnLand() => CurrentState == EnvironmentState.OnLand;
+    public bool IsInWater() => CurrentState == EnvironmentState.InWater;
 }
 
 #endregion
@@ -265,6 +278,11 @@ public class ActionStateMachine
     }
 
     public void SetState(ActionState state) => CurrentState = state;
+
+    public bool IsIdle() => CurrentState == ActionState.Idle;
+    public bool IsOnLandMoving() => CurrentState == ActionState.OnLandMoving;
+    public bool IsInWaterMoving() => CurrentState == ActionState.InWaterMoving;
+    public bool IsDashing() => CurrentState == ActionState.Dashing;
 }
 
 #endregion

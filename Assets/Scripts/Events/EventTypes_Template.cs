@@ -35,6 +35,8 @@ public enum EventType
     PLAYER_EVENT_ON_STATE_CHANGE,   // 玩家状态变化（如加速、无敌等）
     PLAYER_EVENT_ON_DASH,           // 玩家冲刺
     PLAYER_EVENT_ON_BLOW_BUBBLE,    // 玩家吐泡泡
+    PLAYER_EVENT_ON_OXYGEN_CONSUME, // 玩家氧气消耗
+    PLAYER_EVENT_ON_OXYGEN_RECOVER, // 玩家氧气回复
 
     // ==================== UI 事件 ====================
     UI_EVENT_ON_PANEL_OPEN,         // UI 面板打开

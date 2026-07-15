@@ -14,36 +14,28 @@ public class SealBlowBubbleController : MonoBehaviour
 
     private Seal seal;
     private SealModel model;
+    private SealOxygenController oxygenController;
 
     private void Awake()
     {
         seal = GetComponent<Seal>();
         model = GetComponent<SealModel>();
+        oxygenController = GetComponent<SealOxygenController>();
     }
 
     private void Update()
     {
-        if (!IsAlive() || !IsInWater()) return;
+        if (!seal.LifeStateMachine.IsAlive() || !seal.EnvironmentStateMachine.IsInWater()) return;
 
         if (Input.GetKeyDown(blowBubbleKey))
         {
-            if (model.OxygenValue < model.BlowBubbleOxygenCost) return;
+            if (!oxygenController.HasEnoughOxygen(model.BlowBubbleOxygenCost)) return;
             if (bubblePrefab == null) return;
 
-            model.OxygenValue -= model.BlowBubbleOxygenCost;
+            oxygenController.ConsumeOxygen(model.BlowBubbleOxygenCost);
             Instantiate(bubblePrefab, transform.position, Quaternion.identity);
             GameEvents.Publish(EventType.PLAYER_EVENT_ON_BLOW_BUBBLE,
                 new PlayerEventArgs(this.gameObject));
         }
-    }
-
-    private bool IsAlive()
-    {
-        return seal.LifeStateMachine.CurrentState == LifeState.Alive;
-    }
-
-    private bool IsInWater()
-    {
-        return seal.EnvironmentStateMachine.CurrentState == EnvironmentState.InWater;
     }
 }
