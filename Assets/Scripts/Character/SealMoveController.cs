@@ -21,7 +21,10 @@ public class SealMoveController : MonoBehaviour
     private SealOxygenController oxygenController;
     private Rigidbody2D rb;
 
-    private Vector2 currentVelocity;
+    private Vector2 moveTargetVelocity;
+    private Vector2 velocityRef;
+    private Vector2 lastInputDirection = Vector2.right;
+    private float gravityVelocity;
     private bool isDashing;
     private float dashTimer;
 
@@ -49,29 +52,45 @@ public class SealMoveController : MonoBehaviour
         }
 
         Vector2 input = GetMovementInput();
-        HandleDash(input);
+
+        if (input.sqrMagnitude > 0.01f)
+            lastInputDirection = input.normalized;
+
         Move(input);
+        HandleDash();
     }
 
     private void FixedUpdate()
     {
         if (!seal.LifeStateMachine.IsAlive()) return;
 
-        Vector2 targetVelocity;
+        ApplyGravity();
+
         if (isDashing)
         {
-            targetVelocity = currentVelocity;
+            rb.velocity = moveTargetVelocity;
+            return;
         }
-        else
-        {
-            targetVelocity = currentVelocity;
-        }
+
+        Vector2 targetVelocity = moveTargetVelocity;
+        targetVelocity.y += gravityVelocity;
 
         rb.velocity = Vector2.SmoothDamp(
             rb.velocity,
             targetVelocity,
-            ref currentVelocity,
+            ref velocityRef,
             model.VelocitySmoothTime);
+    }
+
+    private void ApplyGravity()
+    {
+        if (!seal.EnvironmentStateMachine.IsInAir())
+        {
+            gravityVelocity = 0f;
+            return;
+        }
+
+        gravityVelocity -= model.GravityScale * Time.fixedDeltaTime;
     }
 
     #region 输入处理
@@ -101,17 +120,38 @@ public class SealMoveController : MonoBehaviour
         return input;
     }
 
-    private void HandleDash(Vector2 input)
+    private void HandleDash()
     {
         if (Input.GetKeyDown(dashKey) && seal.EnvironmentStateMachine.IsInWater())
         {
-            // 检!oxygenController.HasEnoughOxygen(model.DashOxygenCost)
             if (model.OxygenValue < model.DashOxygenCost) return;
 
-            // 确定冲刺方向：有输入则用输入方向，否则用当前朝向
-            Vector2 dashDir = input.sqrMagnitude > 0.01f ? input.normalized : Vector2.right;
+            Vector2 dashDir = GetDashDirection();
+            if (dashDir.sqrMagnitude < 0.01f)
+                dashDir = lastInputDirection;
+
             StartDash(dashDir);
         }
+    }
+
+    private Vector2 GetDashDirection()
+    {
+        Vector2 dir = Vector2.zero;
+
+        if (Input.GetKey(moveLeftKey) || Input.GetKey(KeyCode.LeftArrow))
+            dir.x = -1f;
+        else if (Input.GetKey(moveRightKey) || Input.GetKey(KeyCode.RightArrow))
+            dir.x = 1f;
+
+        if (Input.GetKey(moveUpKey) || Input.GetKey(KeyCode.UpArrow))
+            dir.y = 1f;
+        else if (Input.GetKey(moveDownKey) || Input.GetKey(KeyCode.DownArrow))
+            dir.y = -1f;
+
+        if (dir.sqrMagnitude > 1f)
+            dir.Normalize();
+
+        return dir;
     }
 
     #endregion
@@ -121,7 +161,7 @@ public class SealMoveController : MonoBehaviour
     private void Move(Vector2 input)
     {
         float speed = GetCurrentMoveSpeed();
-        currentVelocity = input * speed;
+        moveTargetVelocity = input * speed;
 
         // 更新动作状态
         if (input.sqrMagnitude > 0.01f)
@@ -153,7 +193,7 @@ public class SealMoveController : MonoBehaviour
         oxygenController.ConsumeOxygen(model.DashOxygenCost);
         isDashing = true;
         dashTimer = model.DashDistance / model.DashSpeed;
-        currentVelocity = direction * model.DashSpeed;
+        moveTargetVelocity = direction * model.DashSpeed;
         seal.ActionStateMachine.SetState(ActionState.Dashing);
         GameEvents.Publish(EventType.PLAYER_EVENT_ON_DASH,
             new PlayerEventArgs(this.gameObject));
@@ -163,7 +203,9 @@ public class SealMoveController : MonoBehaviour
     {
         isDashing = false;
         dashTimer = 0f;
-        currentVelocity = Vector2.zero;
+        moveTargetVelocity = Vector2.zero;
+        velocityRef = Vector2.zero;
+        gravityVelocity = 0f;
         seal.ActionStateMachine.SetState(ActionState.Idle);
     }
 

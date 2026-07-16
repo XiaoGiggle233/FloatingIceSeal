@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Sirenix.OdinInspector;
 /// <summary>
 /// 主角（海豹）类
 /// </summary>
@@ -22,9 +22,20 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
     #region 状态机
 
     public LifeStateMachine LifeStateMachine { get; private set; }
+    [ShowInInspector]
+    public LifeState CurrentLifeState => LifeStateMachine?.CurrentState ?? LifeState.Alive;
+
     public OxygenStateMachine OxygenStateMachine { get; private set; }
+    [ShowInInspector]
+    public OxygenState CurrentOxygenState => OxygenStateMachine?.CurrentState ?? OxygenState.OxygenFull;
+
     public EnvironmentStateMachine EnvironmentStateMachine { get; private set; }
+    [ShowInInspector]
+    public EnvironmentState CurrentEnvironmentState => EnvironmentStateMachine?.CurrentState ?? EnvironmentState.InAir;
+
     public ActionStateMachine ActionStateMachine { get; private set; }
+    [ShowInInspector]
+    public ActionState CurrentActionState => ActionStateMachine?.CurrentState ?? ActionState.Idle;
 
     #endregion
 
@@ -97,6 +108,11 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
     {
         GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
         GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
+    }
+
+    private void OnDestroy()
+    {
+        InformationPool.Remove("Seal");
     }
 
     private void Update()

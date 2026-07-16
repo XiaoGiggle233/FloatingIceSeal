@@ -7,24 +7,30 @@ public class SealEnvironmentStateMachineController : MonoBehaviour
 {
     private Seal seal;
     private EnvironmentStateMachine fsm;
+    private Collider2D sealCollider;
+    private CompositeCollider2D waterCollider;
 
-    private int waterTriggerCount;
+    private bool isInWater;
     private int wallGroundContactCount;
 
     private void Awake()
     {
         seal = GetComponent<Seal>();
         fsm = seal.EnvironmentStateMachine;
+        sealCollider = GetComponent<Collider2D>();
+        ResolveWaterCollider();
     }
 
     private void OnEnable()
     {
         GameEvents.Listen(EventType.PLAYER_EVENT_ON_SPAWN, OnPlayerSpawn);
+        GameEvents.Listen(EventType.INFO_POOL_EVENT_ON_CHANGE, OnPoolChanged);
     }
 
     private void OnDisable()
     {
         GameEvents.Unlisten(EventType.PLAYER_EVENT_ON_SPAWN, OnPlayerSpawn);
+        GameEvents.Unlisten(EventType.INFO_POOL_EVENT_ON_CHANGE, OnPoolChanged);
     }
 
     #region 角色生成初始化
@@ -35,46 +41,62 @@ public class SealEnvironmentStateMachineController : MonoBehaviour
         if (args == null) return;
         if ((GameObject)args.Player != gameObject) return;
 
+        ResolveWaterCollider();
         InitializeState();
     }
 
     private void InitializeState()
     {
-        // 检测初始位置是否在水体中
-        waterTriggerCount = 0;
-        var overlaps = Physics2D.OverlapPointAll(transform.position);
-        foreach (var col in overlaps)
-        {
-            if (col.isTrigger && col.GetComponent<WatterController>() != null)
-                waterTriggerCount++;
-        }
-
-        // 检测初始位置的墙体接触
+        isInWater = CheckIsInWater();
         RecalculateWallGroundContacts();
-
         UpdateEnvironment();
     }
 
     #endregion
 
-    #region 水体触发器检测
+    #region 信息池监听（水体动态注册/注销）
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnPoolChanged(IGameEvent evt)
     {
-        if (other.GetComponent<WatterController>() != null)
-        {
-            waterTriggerCount++;
-            UpdateEnvironment();
-        }
+        var args = evt as InfoPoolEventArgs;
+        if (args == null || args.Key != "Watter") return;
+
+        if (args.Type == InfoPoolEventArgs.ChangeType.Set)
+            ResolveWaterCollider();
+        else if (args.Type == InfoPoolEventArgs.ChangeType.Remove)
+            waterCollider = null;
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+    private void ResolveWaterCollider()
     {
-        if (other.GetComponent<WatterController>() != null)
-        {
-            waterTriggerCount = Mathf.Max(0, waterTriggerCount - 1);
+        if (InformationPool.TryGet("Watter", out object obj) && obj is Component comp)
+            waterCollider = comp.GetComponent<CompositeCollider2D>();
+    }
+
+    #endregion
+
+    #region FixedUpdate 持续检测
+
+    private void FixedUpdate()
+    {
+        bool wasInWater = isInWater;
+        isInWater = CheckIsInWater();
+
+        if (isInWater != wasInWater)
             UpdateEnvironment();
-        }
+    }
+
+    /// <summary>
+    /// 使用 Collider2D.Distance 判断海豹碰撞体是否与水体碰撞体重叠。
+    /// 替代 OverlapPoint，因为 CompositeCollider2D 的 GeometryType=Outlines
+    /// 生成的是边缘碰撞体（没有"内部"），OverlapPoint 永远无法命中。
+    /// Distance 方法直接比较两个碰撞体的几何关系，不受 GeometryType 影响。
+    /// </summary>
+    private bool CheckIsInWater()
+    {
+        if (waterCollider == null || sealCollider == null) return false;
+        var dist = waterCollider.Distance(sealCollider);
+        return dist.isOverlapped;
     }
 
     #endregion
@@ -126,7 +148,7 @@ public class SealEnvironmentStateMachineController : MonoBehaviour
 
     private void UpdateEnvironment()
     {
-        if (waterTriggerCount > 0)
+        if (isInWater)
         {
             fsm.SetState(EnvironmentState.InWater);
             fsm.EnterLeafState(fsm.InWaterState);

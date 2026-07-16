@@ -59,13 +59,13 @@ public class SealOxygenStateMachineController : MonoBehaviour
     {
         float ratio = model.OxygenValue / model.OxygenMaxValue;
 
-        if (ratio >= 1f)
+        if (ratio >= model.OxygenFullThreshold)
             return OxygenState.OxygenFull;
         if (ratio >= model.OxygenSufficientThreshold)
             return OxygenState.OxygenSufficient;
         if (ratio >= model.OxygenInsufficientThreshold)
             return OxygenState.OxygenInsufficient;
-        if (ratio > 0f)
+        if (ratio > model.OxygenCriticalThreshold)
             return OxygenState.OxygenCritical;
 
         return OxygenState.Suffocating;

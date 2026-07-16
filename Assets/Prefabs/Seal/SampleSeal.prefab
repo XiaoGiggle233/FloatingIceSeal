@@ -82,7 +82,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -144,30 +144,34 @@ MonoBehaviour:
   OxygenMaxValue: 100
   OxygenConsumeRate: 5
   OxygenRecoverRate: 20
+  OxygenFullThreshold: 0.8
   OxygenSufficientThreshold: 0.5
   OxygenInsufficientThreshold: 0.25
+  OxygenCriticalThreshold: 0.1
   AirMoveSpeed: 3
   LandMoveSpeed: 2
   WaterMoveSpeed: 4
-  DashSpeed: 12
-  DashDistance: 3
+  DashSpeed: 10
+  DashDistance: 5
   DashOxygenCost: 15
   VelocitySmoothTime: 0.1
   BlowBubbleOxygenCost: 10
+  BlowBubbleSpawnOffset: 2
+  GravityScale: 2
   OxygenFullShape:
-    radius: 1.8
+    radius: 0.9
     rectHeight: 0
   OxygenSufficientShape:
-    radius: 1.2
+    radius: 0.6
     rectHeight: 0.4
   OxygenInsufficientShape:
-    radius: 0.7
+    radius: 0.35
     rectHeight: 1
   OxygenCriticalShape:
-    radius: 0.5
+    radius: 0.25
     rectHeight: 1.6
   SuffocatingShape:
-    radius: 0.4
+    radius: 0.2
     rectHeight: 2.2
 --- !u!114 &3979857987247524582
 MonoBehaviour:
@@ -242,7 +246,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blowBubbleKey: 106
-  bubblePrefab: {fileID: 0}
+  bubblePrefab: {fileID: -8128119179514021180, guid: 76a455da0b6716443af884612180c706, type: 3}
 --- !u!50 &4333769508640493303
 Rigidbody2D:
   serializedVersion: 4

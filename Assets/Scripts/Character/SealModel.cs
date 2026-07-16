@@ -35,6 +35,11 @@ public class SealModel : MonoBehaviour
     [SerializeField] public float OxygenRecoverRate = 20f;
 
     [FoldoutGroup("氧气系统")]
+    [LabelText("满氧阈值"), PropertyRange(0, 1), SuffixLabel("%", Overlay = true)]
+    [PropertyTooltip("氧气百分比高于此值视为满氧")]
+    [SerializeField] public float OxygenFullThreshold = 1f;
+
+    [FoldoutGroup("氧气系统")]
     [LabelText("充足阈值"), PropertyRange(0, 1), SuffixLabel("%", Overlay = true)]
     [PropertyTooltip("氧气百分比高于此值视为充足")]
     [SerializeField] public float OxygenSufficientThreshold = 0.5f;
@@ -43,6 +48,11 @@ public class SealModel : MonoBehaviour
     [LabelText("不足阈值"), PropertyRange(0, 1), SuffixLabel("%", Overlay = true)]
     [PropertyTooltip("氧气百分比低于此值视为不足")]
     [SerializeField] public float OxygenInsufficientThreshold = 0.25f;
+    
+    [FoldoutGroup("氧气系统")]
+    [LabelText("濒危阈值"), PropertyRange(0, 1), SuffixLabel("%", Overlay = true)]
+    [PropertyTooltip("氧气百分比低于此值视为窒息")]
+    [SerializeField] public float OxygenCriticalThreshold = 0f;
 
     #endregion
 
@@ -62,7 +72,7 @@ public class SealModel : MonoBehaviour
 
     [FoldoutGroup("移动速度")]
     [LabelText("冲刺速度"), MinValue(0), SuffixLabel("m/s", Overlay = true)]
-    [SerializeField] public float DashSpeed = 12f;
+    [SerializeField] public float DashSpeed = 8f;
 
     #endregion
 
@@ -70,7 +80,7 @@ public class SealModel : MonoBehaviour
 
     [FoldoutGroup("冲刺", expanded: false)]
     [LabelText("冲刺距离"), MinValue(0), SuffixLabel("m", Overlay = true)]
-    [SerializeField] public float DashDistance = 3f;
+    [SerializeField] public float DashDistance = 2f;
 
     [FoldoutGroup("冲刺")]
     [LabelText("氧气消耗"), MinValue(0), SuffixLabel("单位", Overlay = true)]
@@ -87,6 +97,18 @@ public class SealModel : MonoBehaviour
     [FoldoutGroup("吐泡泡", expanded: false)]
     [LabelText("氧气消耗"), MinValue(0), SuffixLabel("单位", Overlay = true)]
     [SerializeField] public float BlowBubbleOxygenCost = 10f;
+
+    [FoldoutGroup("吐泡泡")]
+    [LabelText("生成偏移"), SuffixLabel("m", Overlay = true)]
+    [SerializeField] public float BlowBubbleSpawnOffset = 1.5f;
+
+    #endregion
+
+    #region 重力
+
+    [FoldoutGroup("重力", expanded: false)]
+    [LabelText("重力"), MinValue(0), SuffixLabel("m/s²", Overlay = true)]
+    [SerializeField] public float GravityScale = 2f;
 
     #endregion
 

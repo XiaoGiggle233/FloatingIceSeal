@@ -33,7 +33,8 @@ public class SealBlowBubbleController : MonoBehaviour
             if (bubblePrefab == null) return;
 
             oxygenController.ConsumeOxygen(model.BlowBubbleOxygenCost);
-            Instantiate(bubblePrefab, transform.position, Quaternion.identity);
+            Vector3 spawnPos = transform.position + Vector3.up * model.BlowBubbleSpawnOffset;
+            Instantiate(bubblePrefab, spawnPos, Quaternion.identity);
             GameEvents.Publish(EventType.PLAYER_EVENT_ON_BLOW_BUBBLE,
                 new PlayerEventArgs(this.gameObject));
         }
