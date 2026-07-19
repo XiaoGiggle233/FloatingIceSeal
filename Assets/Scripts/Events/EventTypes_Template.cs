@@ -81,6 +81,7 @@ public enum EventType
     // ==================== 泡泡事件 ====================
     BUBBLE_EVENT_ON_SPAWN,          // 泡泡生成
     BUBBLE_EVENT_ON_BURST,          // 泡泡破裂
+    BUBBLE_EVENT_ON_RELEASE,        // 泡泡释放（蓄力完成）
 
     // ==================== 信息池事件 ====================
     INFO_POOL_EVENT_ON_CHANGE,      // 信息池数据变更
@@ -289,6 +290,24 @@ public class BubbleBurstEventArgs : GameEventBase
     public BubbleBurstEventArgs(GameObject bubble)
     {
         Bubble = bubble;
+    }
+}
+
+/// <summary>吐泡泡事件参数（蓄力完成后释放）</summary>
+public class BubbleBlowEventArgs : GameEventBase
+{
+    /// <summary>海豹对象</summary>
+    public GameObject Seal { get; }
+    /// <summary>生成的泡泡对象</summary>
+    public GameObject Bubble { get; }
+    /// <summary>泡泡储存的氧气量</summary>
+    public float OxygenValue { get; }
+
+    public BubbleBlowEventArgs(GameObject seal, GameObject bubble, float oxygenValue)
+    {
+        Seal = seal;
+        Bubble = bubble;
+        OxygenValue = oxygenValue;
     }
 }
 

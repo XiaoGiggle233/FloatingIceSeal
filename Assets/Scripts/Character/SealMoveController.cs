@@ -164,17 +164,22 @@ public class SealMoveController : MonoBehaviour
         moveTargetVelocity = input * speed;
 
         // 更新动作状态
+        ActionState newState;
         if (input.sqrMagnitude > 0.01f)
         {
             if (seal.EnvironmentStateMachine.IsInWater())
-                seal.ActionStateMachine.SetState(ActionState.InWaterMoving);
+                newState = ActionState.InWaterMoving;
             else if (seal.EnvironmentStateMachine.IsOnLand())
-                seal.ActionStateMachine.SetState(ActionState.OnLandMoving);
+                newState = ActionState.OnLandMoving;
+            else
+                newState = ActionState.Idle;
         }
         else
         {
-            seal.ActionStateMachine.SetState(ActionState.Idle);
+            newState = ActionState.Idle;
         }
+
+        seal.ActionStateMachine.SetState(newState);
     }
 
     private float GetCurrentMoveSpeed()

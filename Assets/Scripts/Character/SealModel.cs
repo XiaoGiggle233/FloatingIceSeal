@@ -95,12 +95,16 @@ public class SealModel : MonoBehaviour
     #region 吐泡泡
 
     [FoldoutGroup("吐泡泡", expanded: false)]
-    [LabelText("氧气消耗"), MinValue(0), SuffixLabel("单位", Overlay = true)]
-    [SerializeField] public float BlowBubbleOxygenCost = 10f;
+    [LabelText("蓄力消耗速率"), MinValue(0), SuffixLabel("/秒", Overlay = true)]
+    [SerializeField] public float BlowBubbleChargeOxygenRate = 15f;
 
     [FoldoutGroup("吐泡泡")]
     [LabelText("生成偏移"), SuffixLabel("m", Overlay = true)]
     [SerializeField] public float BlowBubbleSpawnOffset = 1.5f;
+
+    [FoldoutGroup("吐泡泡")]
+    [LabelText("氧气回复比例"), MinValue(0), SuffixLabel("倍", Overlay = true)]
+    [SerializeField] public float BubbleOxygenRecoverRatio = 1f;
 
     #endregion
 

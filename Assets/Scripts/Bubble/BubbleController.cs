@@ -33,12 +33,23 @@ public class BubbleController : MonoBehaviour
     {
         GameEvents.Listen(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
         GameEvents.Listen(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
+        GameEvents.Listen(EventType.BUBBLE_EVENT_ON_RELEASE, OnBubbleRelease);
     }
 
     private void OnDisable()
     {
         GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
         GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
+        GameEvents.Unlisten(EventType.BUBBLE_EVENT_ON_RELEASE, OnBubbleRelease);
+    }
+
+    private void OnBubbleRelease(IGameEvent evt)
+    {
+        var args = evt as BubbleBlowEventArgs;
+        if (args == null) return;
+        if (args.Bubble != this.gameObject) return;
+
+        lastWaterContactTime = Time.time;
     }
 
     private void Update()

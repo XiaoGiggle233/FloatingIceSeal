@@ -37,6 +37,10 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
     [ShowInInspector]
     public ActionState CurrentActionState => ActionStateMachine?.CurrentState ?? ActionState.Idle;
 
+    public DirectionStateMachine DirectionStateMachine { get; private set; }
+    [ShowInInspector]
+    public DirectionState CurrentDirectionState => DirectionStateMachine?.CurrentState ?? DirectionState.Right;
+
     #endregion
 
     #region 碰撞检测
@@ -73,7 +77,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
 
         if (bubble != null)
         {
-            OxygenController.RecoverOxygen(bubble.oxygen);
+            OxygenController.RecoverOxygen(bubble.oxygen * Model.BubbleOxygenRecoverRatio);
         }
     }
 
@@ -89,6 +93,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         OxygenStateMachine = new OxygenStateMachine(this);
         EnvironmentStateMachine = new EnvironmentStateMachine(this);
         ActionStateMachine = new ActionStateMachine(this);
+        DirectionStateMachine = new DirectionStateMachine(this);
     }
 
     private void Start()
@@ -121,6 +126,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         OxygenStateMachine.Update();
         EnvironmentStateMachine.Update();
         ActionStateMachine.Update();
+        DirectionStateMachine.Update();
     }
 
     private void FixedUpdate()
@@ -129,6 +135,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         OxygenStateMachine.FixedUpdate();
         EnvironmentStateMachine.FixedUpdate();
         ActionStateMachine.FixedUpdate();
+        DirectionStateMachine.FixedUpdate();
     }
 
     #endregion

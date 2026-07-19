@@ -66,7 +66,13 @@ public class LifeStateMachine
         currentLeafState?.Enter();
     }
 
-    public void SetState(LifeState state) => CurrentState = state;
+    public void SetState(LifeState state)
+    {
+        if (CurrentState == state) return;
+        CurrentState = state;
+        GameEvents.Publish(EventType.PLAYER_EVENT_ON_STATE_CHANGE,
+            new GameStateEventArgs(state.ToString()));
+    }
 
     public bool IsAlive() => CurrentState == LifeState.Alive;
     public bool IsDead() => CurrentState == LifeState.Dead;
@@ -142,7 +148,13 @@ public class OxygenStateMachine
         currentLeafState?.Enter();
     }
 
-    public void SetState(OxygenState state) => CurrentState = state;
+    public void SetState(OxygenState state)
+    {
+        if (CurrentState == state) return;
+        CurrentState = state;
+        GameEvents.Publish(EventType.PLAYER_EVENT_ON_STATE_CHANGE,
+            new GameStateEventArgs(state.ToString()));
+    }
 
     public bool IsOxygenFull() => CurrentState == OxygenState.OxygenFull;
     public bool IsOxygenSufficient() => CurrentState == OxygenState.OxygenSufficient;
@@ -207,7 +219,13 @@ public class EnvironmentStateMachine
         currentLeafState?.Enter();
     }
 
-    public void SetState(EnvironmentState state) => CurrentState = state;
+    public void SetState(EnvironmentState state)
+    {
+        if (CurrentState == state) return;
+        CurrentState = state;
+        GameEvents.Publish(EventType.PLAYER_EVENT_ON_STATE_CHANGE,
+            new GameStateEventArgs(state.ToString()));
+    }
 
     public bool IsInAir() => CurrentState == EnvironmentState.InAir;
     public bool IsOnLand() => CurrentState == EnvironmentState.OnLand;
@@ -277,12 +295,127 @@ public class ActionStateMachine
         currentLeafState?.Enter();
     }
 
-    public void SetState(ActionState state) => CurrentState = state;
+    public void SetState(ActionState state)
+    {
+        if (CurrentState == state) return;
+        CurrentState = state;
+        GameEvents.Publish(EventType.PLAYER_EVENT_ON_STATE_CHANGE,
+            new GameStateEventArgs(state.ToString()));
+    }
 
     public bool IsIdle() => CurrentState == ActionState.Idle;
     public bool IsOnLandMoving() => CurrentState == ActionState.OnLandMoving;
     public bool IsInWaterMoving() => CurrentState == ActionState.InWaterMoving;
     public bool IsDashing() => CurrentState == ActionState.Dashing;
+}
+
+#endregion
+
+#region ========== 5. 移动方向状态机 (DirectionStateMachine) ==========
+
+public enum DirectionState { Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight }
+
+public abstract class DirectionStateBase : SealState<DirectionStateMachine>
+{
+    protected DirectionStateBase(Seal owner, DirectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class UpState : DirectionStateBase
+{
+    public UpState(Seal owner, DirectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class DownState : DirectionStateBase
+{
+    public DownState(Seal owner, DirectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class LeftState : DirectionStateBase
+{
+    public LeftState(Seal owner, DirectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class RightState : DirectionStateBase
+{
+    public RightState(Seal owner, DirectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class UpLeftState : DirectionStateBase
+{
+    public UpLeftState(Seal owner, DirectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class UpRightState : DirectionStateBase
+{
+    public UpRightState(Seal owner, DirectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class DownLeftState : DirectionStateBase
+{
+    public DownLeftState(Seal owner, DirectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class DownRightState : DirectionStateBase
+{
+    public DownRightState(Seal owner, DirectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class DirectionStateMachine
+{
+    private Seal owner;
+
+    public DirectionState CurrentState { get; private set; }
+    private DirectionStateBase currentLeafState;
+
+    public UpState UpState { get; }
+    public DownState DownState { get; }
+    public LeftState LeftState { get; }
+    public RightState RightState { get; }
+    public UpLeftState UpLeftState { get; }
+    public UpRightState UpRightState { get; }
+    public DownLeftState DownLeftState { get; }
+    public DownRightState DownRightState { get; }
+
+    public DirectionStateMachine(Seal owner)
+    {
+        this.owner = owner;
+        UpState = new UpState(owner, this);
+        DownState = new DownState(owner, this);
+        LeftState = new LeftState(owner, this);
+        RightState = new RightState(owner, this);
+        UpLeftState = new UpLeftState(owner, this);
+        UpRightState = new UpRightState(owner, this);
+        DownLeftState = new DownLeftState(owner, this);
+        DownRightState = new DownRightState(owner, this);
+    }
+
+    public void Update() => currentLeafState?.Update();
+    public void FixedUpdate() => currentLeafState?.FixedUpdate();
+
+    public void EnterLeafState(DirectionStateBase newState)
+    {
+        if (currentLeafState == newState) return;
+        currentLeafState?.Exit();
+        currentLeafState = newState;
+        currentLeafState?.Enter();
+    }
+
+    public void SetState(DirectionState state)
+    {
+        if (CurrentState == state) return;
+        CurrentState = state;
+        GameEvents.Publish(EventType.PLAYER_EVENT_ON_STATE_CHANGE,
+            new GameStateEventArgs(state.ToString()));
+    }
+
+    public bool IsUp() => CurrentState == DirectionState.Up;
+    public bool IsDown() => CurrentState == DirectionState.Down;
+    public bool IsLeft() => CurrentState == DirectionState.Left;
+    public bool IsRight() => CurrentState == DirectionState.Right;
+    public bool IsUpLeft() => CurrentState == DirectionState.UpLeft;
+    public bool IsUpRight() => CurrentState == DirectionState.UpRight;
+    public bool IsDownLeft() => CurrentState == DirectionState.DownLeft;
+    public bool IsDownRight() => CurrentState == DirectionState.DownRight;
 }
 
 #endregion

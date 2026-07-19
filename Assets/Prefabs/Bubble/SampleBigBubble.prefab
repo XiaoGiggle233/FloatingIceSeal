@@ -14,8 +14,9 @@ GameObject:
   - component: {fileID: 645722474743262640}
   - component: {fileID: -8128119179514021180}
   - component: {fileID: -1397927398209080573}
+  - component: {fileID: -777539408755825350}
   m_Layer: 7
-  m_Name: SampleBubble
+  m_Name: SampleBigBubble
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -164,7 +165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   oxygen: 8
   speed: 1
-  outOfWaterBurstDelay: 1
+  outOfWaterBurstDelay: 0.2
 --- !u!114 &-1397927398209080573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,5 +176,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af62351b5fcea1a4ea7b261b2b9f9569, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-777539408755825350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4361703366834461163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d17c588d668d7b7498e03c877730f74a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

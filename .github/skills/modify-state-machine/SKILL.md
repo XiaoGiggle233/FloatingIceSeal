@@ -36,7 +36,7 @@ public class XxxStateMachine
     // 构造函数中初始化所有状态
     // Update() / FixedUpdate() 委托给 currentLeafState
     // EnterLeafState(newState) 执行状态转换
-    // SetState(state) 设置枚举值
+    // SetState(state) 设置枚举值，内置去重并自动发布 PLAYER_EVENT_ON_STATE_CHANGE 事件
     // IsXxx() 判断当前状态（每个枚举值对应一个方法）
 }
 ```
@@ -120,6 +120,7 @@ fsm.EnterLeafState(fsm.NewStateState);
 | `OxygenStateMachine` | `OxygenState` | OxygenFull, OxygenSufficient, OxygenInsufficient, OxygenCritical, Suffocating |
 | `EnvironmentStateMachine` | `EnvironmentState` | InAir, OnLand, InWater |
 | `ActionStateMachine` | `ActionState` | Idle, OnLandMoving, InWaterMoving, Dashing |
+| `DirectionStateMachine` | `DirectionState` | Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight |
 
 ## 注意事项
 

@@ -148,20 +148,31 @@ public class SealEnvironmentStateMachineController : MonoBehaviour
 
     private void UpdateEnvironment()
     {
+        EnvironmentState newState;
+
         if (isInWater)
-        {
-            fsm.SetState(EnvironmentState.InWater);
-            fsm.EnterLeafState(fsm.InWaterState);
-        }
+            newState = EnvironmentState.InWater;
         else if (wallGroundContactCount > 0)
-        {
-            fsm.SetState(EnvironmentState.OnLand);
-            fsm.EnterLeafState(fsm.OnLandState);
-        }
+            newState = EnvironmentState.OnLand;
         else
+            newState = EnvironmentState.InAir;
+
+        fsm.SetState(newState);
+        fsm.EnterLeafState(GetLeafState(newState));
+    }
+
+    private EnvironmentStateBase GetLeafState(EnvironmentState state)
+    {
+        switch (state)
         {
-            fsm.SetState(EnvironmentState.InAir);
-            fsm.EnterLeafState(fsm.InAirState);
+            case EnvironmentState.InAir:
+                return fsm.InAirState;
+            case EnvironmentState.OnLand:
+                return fsm.OnLandState;
+            case EnvironmentState.InWater:
+                return fsm.InWaterState;
+            default:
+                return fsm.InAirState;
         }
     }
 

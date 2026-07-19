@@ -50,9 +50,6 @@ public class SealOxygenStateMachineController : MonoBehaviour
 
         ApplyState(newState);
         previousState = newState;
-
-        GameEvents.Publish(EventType.PLAYER_EVENT_ON_STATE_CHANGE,
-            new GameStateEventArgs(newState.ToString()));
     }
 
     private OxygenState EvaluateState()
