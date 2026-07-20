@@ -86,6 +86,13 @@ public enum EventType
     // ==================== 信息池事件 ====================
     INFO_POOL_EVENT_ON_CHANGE,      // 信息池数据变更
 
+    // ==================== 动画事件 ====================
+    ANIMATION_EVENT_ON_STATE_CHANGE, // 动画状态切换
+    ANIMATION_EVENT_ON_START,        // 动画开始播放
+    ANIMATION_EVENT_ON_END,          // 动画播放完毕
+    ANIMATION_EVENT_ON_KEYFRAME,     // 动画关键帧
+    ANIMATION_EVENT_ON_CUSTOM,       // 自定义动画事件
+
     // ==================== 联网事件（可选） ====================
     // NETWORK_EVENT_ON_CONNECTED,
     // NETWORK_EVENT_ON_DISCONNECTED,
@@ -322,6 +329,80 @@ public class GenericEventArgs : GameEventBase
     public GenericEventArgs(Dictionary<string, object> data = null)
     {
         Data = data ?? new Dictionary<string, object>();
+    }
+}
+
+// ==================== 动画事件参数 ====================
+
+/// <summary>动画状态变更事件参数</summary>
+public class AnimationStateEventArgs : GameEventBase
+{
+    /// <summary>动画所属的 GameObject</summary>
+    public GameObject AnimatorOwner { get; }
+    /// <summary>上一个动画状态名（可为空）</summary>
+    public string PreviousState { get; }
+    /// <summary>当前动画状态名（可为空）</summary>
+    public string CurrentState { get; }
+
+    public AnimationStateEventArgs(GameObject owner, string previousState, string currentState)
+    {
+        AnimatorOwner = owner;
+        PreviousState = previousState;
+        CurrentState = currentState;
+    }
+}
+
+/// <summary>自定义动画事件参数（支持多种数据类型）</summary>
+public class AnimationCustomEventArgs : GameEventBase
+{
+    /// <summary>动画所属的 GameObject</summary>
+    public GameObject AnimatorOwner { get; }
+    /// <summary>事件键（用于区分不同类型的动画事件）</summary>
+    public string EventKey { get; }
+    /// <summary>字符串参数值</summary>
+    public string StringValue { get; }
+    /// <summary>整数参数值</summary>
+    public int IntValue { get; }
+    /// <summary>浮点参数值</summary>
+    public float FloatValue { get; }
+    /// <summary>参数数据类型</summary>
+    public enum ValueType { None, String, Int, Float }
+    /// <summary>当前携带的数据类型</summary>
+    public ValueType DataType { get; }
+
+    /// <summary>无参构造函数</summary>
+    public AnimationCustomEventArgs(GameObject owner, string eventKey)
+    {
+        AnimatorOwner = owner;
+        EventKey = eventKey;
+        DataType = ValueType.None;
+    }
+
+    /// <summary>字符串参数构造函数</summary>
+    public AnimationCustomEventArgs(GameObject owner, string eventKey, string value)
+    {
+        AnimatorOwner = owner;
+        EventKey = eventKey;
+        StringValue = value;
+        DataType = ValueType.String;
+    }
+
+    /// <summary>整数参数构造函数</summary>
+    public AnimationCustomEventArgs(GameObject owner, string eventKey, int value)
+    {
+        AnimatorOwner = owner;
+        EventKey = eventKey;
+        IntValue = value;
+        DataType = ValueType.Int;
+    }
+
+    /// <summary>浮点参数构造函数</summary>
+    public AnimationCustomEventArgs(GameObject owner, string eventKey, float value)
+    {
+        AnimatorOwner = owner;
+        EventKey = eventKey;
+        FloatValue = value;
+        DataType = ValueType.Float;
     }
 }
 

@@ -54,6 +54,11 @@ public class SealModel : MonoBehaviour
     [PropertyTooltip("氧气百分比低于此值视为窒息")]
     [SerializeField] public float OxygenCriticalThreshold = 0f;
 
+    [FoldoutGroup("氧气系统")]
+    [LabelText("露出水面回复阈值"), PropertyRange(0, 1), SuffixLabel("%", Overlay = true)]
+    [PropertyTooltip("角色露出水面的比例高于此值时开始回复氧气")]
+    [SerializeField] public float OxygenRecoverExposeRatio = 0.5f;
+
     #endregion
 
     #region 移动速度
