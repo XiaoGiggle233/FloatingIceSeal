@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8293943069873897874}
   - component: {fileID: 7698335862157146143}
   - component: {fileID: 8806167096528731540}
+  - component: {fileID: -9052588044353316386}
   m_Layer: 0
   m_Name: Watter
   m_TagString: Untagged
@@ -268,3 +269,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9cb7a5fc70c0854ba9ca542f67fe335, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-9052588044353316386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1060734806101115645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41b761d4382316741aa14d6cfbb1a697, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowDirection: 0
+  forceAmount: 5

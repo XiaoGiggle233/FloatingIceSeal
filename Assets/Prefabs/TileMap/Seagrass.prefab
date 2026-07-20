@@ -14,9 +14,9 @@ GameObject:
   - component: {fileID: 3629741732061831669}
   - component: {fileID: 2326041860383977129}
   - component: {fileID: 5548577111294949984}
-  - component: {fileID: 1168287467631818453}
-  m_Layer: 8
-  m_Name: SteelWireMesh
+  - component: {fileID: 8053683162337249364}
+  m_Layer: 9
+  m_Name: Seagrass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -254,7 +254,7 @@ CompositeCollider2D:
   m_OffsetDistance: 0.00005
   m_UseDelaunayMesh: 0
   m_CompositeGameObject: {fileID: 2837737539424129844}
---- !u!114 &1168287467631818453
+--- !u!114 &8053683162337249364
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -263,6 +263,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 2837737539424129844}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2bbf050367de0ae4b9298eeab30fb5b8, type: 3}
+  m_Script: {fileID: 11500000, guid: f29aac7f4a4676e4bae8ee3b9e697aaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

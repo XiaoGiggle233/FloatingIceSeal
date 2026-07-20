@@ -11,6 +11,7 @@ public class BubbleController : MonoBehaviour
     private GameObject water;
     private GameObject wall;
     private GameObject seal;
+    private GameObject seagrass;
 
     private float lastWaterContactTime;
 
@@ -25,6 +26,7 @@ public class BubbleController : MonoBehaviour
         water = ResolveGameObject("Watter");
         wall = ResolveGameObject("Wall");
         seal = ResolveGameObject("Seal");
+        seagrass = ResolveGameObject("Seagrass");
 
         lastWaterContactTime = Time.time;
     }
@@ -72,7 +74,7 @@ public class BubbleController : MonoBehaviour
         {
             lastWaterContactTime = Time.time;
         }
-        else if (other == wall || other == seal)
+        else if (other == wall || other == seal || other == seagrass)
         {
             bubbleBase.Burst();
         }
