@@ -7,12 +7,17 @@ using UnityEngine;
 /// </summary>
 public class SealOxygenController : MonoBehaviour
 {
+    [SerializeField] private LayerMask waterLayerMask;
+
     private Seal seal;
     private SealModel model;
     private Collider2D sealCollider;
 
     private void Awake()
     {
+        if (waterLayerMask.value == 0)
+            waterLayerMask = LayerMask.GetMask("Watter");
+
         seal = GetComponent<Seal>();
         model = GetComponent<SealModel>();
         sealCollider = GetComponent<Collider2D>();
@@ -103,9 +108,8 @@ public class SealOxygenController : MonoBehaviour
     private float GetWaterSurfaceY(float x, CompositeCollider2D waterCollider)
     {
         Vector2 origin = new Vector2(x, waterCollider.bounds.max.y + 10f);
-        int layerMask = 1 << waterCollider.gameObject.layer;
 
-        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, Mathf.Infinity, layerMask);
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, Mathf.Infinity, waterLayerMask);
         if (hit.collider != null)
             return hit.point.y;
 

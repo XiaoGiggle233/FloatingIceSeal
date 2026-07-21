@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class SmallBubble : BubbleBase
 {
+    [SerializeField] public float riseBurstDistance = 10f;
+
     public override void Burst()
     {
         GameEvents.Publish(EventType.BUBBLE_EVENT_ON_BURST,

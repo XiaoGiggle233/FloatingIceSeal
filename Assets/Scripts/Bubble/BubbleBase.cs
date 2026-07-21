@@ -9,8 +9,9 @@ public abstract class BubbleBase : MonoBehaviour, ICollisionEventPublisher
     [SerializeField]public int oxygen;
     //上浮的速度
     [SerializeField]public float speed;
-    //离开水面后延迟破裂的时间（秒）
-    [SerializeField]public float outOfWaterBurstDelay = 1f;
+
+    //离开水面超过此距离（单位）即破裂
+    [SerializeField]public float outOfWaterBurstDistance = 0.5f;
 
     //泡泡破裂
     [Button("Burst", ButtonSizes.Large)]

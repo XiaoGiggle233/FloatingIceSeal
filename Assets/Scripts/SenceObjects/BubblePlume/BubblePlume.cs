@@ -6,24 +6,34 @@ using UnityEngine.Tilemaps;
 public class BubblePlume : MonoBehaviour
 {
     [Title("小气泡预制体")]
+    [LabelText("小气泡预制体")]
     [SerializeField, Required, InfoBox("请拖入小气泡预制体")]
     private GameObject smallBubblePrefab;
 
     [Title("生成设置")]
-    [SerializeField, MinValue(0.1f), SuffixLabel("秒", true)]
+    [LabelText("生成间隔"), SuffixLabel("秒", true)]
+    [SerializeField, MinValue(0.1f)]
     private float spawnInterval = 2f;
 
     [Title("小气泡参数")]
+    [LabelText("氧气量")]
     [SerializeField, MinValue(0)]
     private int oxygen = 1;
 
+    [LabelText("上浮速度")]
     [SerializeField, MinValue(0.1f)]
     private float speed = 1f;
 
-    [SerializeField, MinValue(0f), SuffixLabel("秒", true)]
-    private float outOfWaterBurstDelay = 1f;
+    [LabelText("出水破裂距离")]
+    [SerializeField, MinValue(0f)]
+    private float outOfWaterBurstDistance = 0.5f;
+
+    [LabelText("上升破裂距离")]
+    [SerializeField, MinValue(0f)]
+    private float riseBurstDistance = 10f;
 
     [Title("信息池")]
+    [LabelText("信息池键名")]
     [SerializeField] private string infoPoolKey = "BubblePlume";
 
     private float timer;
@@ -89,7 +99,8 @@ public class BubblePlume : MonoBehaviour
             {
                 bubble.oxygen = oxygen;
                 bubble.speed = speed;
-                bubble.outOfWaterBurstDelay = outOfWaterBurstDelay;
+                bubble.outOfWaterBurstDistance = outOfWaterBurstDistance;
+                bubble.riseBurstDistance = riseBurstDistance;
             }
         }
     }
