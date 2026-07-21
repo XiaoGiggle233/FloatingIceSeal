@@ -142,6 +142,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ab899c1ccd9d91449c2d320cfa49dba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  oxygenValue: 0
   OxygenMaxValue: 100
   OxygenConsumeRate: 5
   OxygenRecoverRate: 20
@@ -149,6 +150,7 @@ MonoBehaviour:
   OxygenSufficientThreshold: 0.5
   OxygenInsufficientThreshold: 0.25
   OxygenCriticalThreshold: 0.1
+  OxygenRecoverExposeRatio: 0.5
   AirMoveSpeed: 3
   LandMoveSpeed: 2
   WaterMoveSpeed: 4
@@ -165,16 +167,16 @@ MonoBehaviour:
     rectHeight: 0
   OxygenSufficientShape:
     radius: 0.6
-    rectHeight: 0.4
+    rectHeight: 0.2
   OxygenInsufficientShape:
     radius: 0.35
-    rectHeight: 1
+    rectHeight: 0.5
   OxygenCriticalShape:
     radius: 0.25
-    rectHeight: 1.2
+    rectHeight: 0.6
   SuffocatingShape:
     radius: 0.2
-    rectHeight: 1.5
+    rectHeight: 0.75
 --- !u!114 &3979857987247524582
 MonoBehaviour:
   m_ObjectHideFlags: 0

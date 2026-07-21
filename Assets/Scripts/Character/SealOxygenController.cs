@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -9,26 +10,22 @@ public class SealOxygenController : MonoBehaviour
     private Seal seal;
     private SealModel model;
     private Collider2D sealCollider;
-    private CompositeCollider2D waterCollider;
 
     private void Awake()
     {
         seal = GetComponent<Seal>();
         model = GetComponent<SealModel>();
         sealCollider = GetComponent<Collider2D>();
-        ResolveWaterCollider();
     }
 
     private void OnEnable()
     {
         GameEvents.Listen(EventType.PLAYER_EVENT_ON_SPAWN, OnPlayerSpawn);
-        GameEvents.Listen(EventType.INFO_POOL_EVENT_ON_CHANGE, OnPoolChanged);
     }
 
     private void OnDisable()
     {
         GameEvents.Unlisten(EventType.PLAYER_EVENT_ON_SPAWN, OnPlayerSpawn);
-        GameEvents.Unlisten(EventType.INFO_POOL_EVENT_ON_CHANGE, OnPoolChanged);
     }
 
     private void Update()
@@ -47,33 +44,34 @@ public class SealOxygenController : MonoBehaviour
         }
     }
 
-    #region 信息池监听（水体动态注册/注销）
-
-    private void OnPoolChanged(IGameEvent evt)
-    {
-        var args = evt as InfoPoolEventArgs;
-        if (args == null || args.Key != "Watter") return;
-
-        if (args.Type == InfoPoolEventArgs.ChangeType.Set)
-            ResolveWaterCollider();
-        else if (args.Type == InfoPoolEventArgs.ChangeType.Remove)
-            waterCollider = null;
-    }
-
-    private void ResolveWaterCollider()
-    {
-        if (InformationPool.TryGet("Watter", out object obj) && obj is Component comp)
-            waterCollider = comp.GetComponent<CompositeCollider2D>();
-    }
-
-    #endregion
-
     #region 事件处理
 
     private void OnPlayerSpawn(IGameEvent evt)
     {
         SetOxygenToMax();
-        ResolveWaterCollider();
+    }
+
+    #endregion
+
+    #region 水体查询
+
+    /// <summary>获取当前与海豹重叠的水体碰撞体，没有则返回 null</summary>
+    private CompositeCollider2D GetOverlappingWaterCollider()
+    {
+        if (sealCollider == null) return null;
+
+        if (!InformationPool.TryGet("WatterList", out List<WatterController> waterList) || waterList == null)
+            return null;
+
+        foreach (var wc in waterList)
+        {
+            if (wc == null) continue;
+            var col = wc.GetComponent<CompositeCollider2D>();
+            if (col == null) continue;
+            var dist = col.Distance(sealCollider);
+            if (dist.isOverlapped) return col;
+        }
+        return null;
     }
 
     #endregion
@@ -84,6 +82,8 @@ public class SealOxygenController : MonoBehaviour
     private float GetExposeRatio()
     {
         if (sealCollider == null) return 1f;
+
+        var waterCollider = GetOverlappingWaterCollider();
         if (waterCollider == null) return 1f;
 
         Bounds bounds = sealCollider.bounds;
@@ -92,7 +92,7 @@ public class SealOxygenController : MonoBehaviour
         float charHeight = charTop - charBottom;
         if (charHeight <= 0f) return 1f;
 
-        float waterSurfaceY = GetWaterSurfaceY(bounds.center.x);
+        float waterSurfaceY = GetWaterSurfaceY(bounds.center.x, waterCollider);
         if (waterSurfaceY <= charBottom) return 1f;
         if (waterSurfaceY >= charTop) return 0f;
 
@@ -100,7 +100,7 @@ public class SealOxygenController : MonoBehaviour
     }
 
     /// <summary>通过射线检测获取指定 X 坐标处的水面 Y 值</summary>
-    private float GetWaterSurfaceY(float x)
+    private float GetWaterSurfaceY(float x, CompositeCollider2D waterCollider)
     {
         Vector2 origin = new Vector2(x, waterCollider.bounds.max.y + 10f);
         int layerMask = 1 << waterCollider.gameObject.layer;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -8,7 +9,6 @@ public class SealEnvironmentStateMachineController : MonoBehaviour
     private Seal seal;
     private EnvironmentStateMachine fsm;
     private Collider2D sealCollider;
-    private CompositeCollider2D waterCollider;
 
     private bool isInWater;
     private int wallGroundContactCount;
@@ -18,19 +18,16 @@ public class SealEnvironmentStateMachineController : MonoBehaviour
         seal = GetComponent<Seal>();
         fsm = seal.EnvironmentStateMachine;
         sealCollider = GetComponent<Collider2D>();
-        ResolveWaterCollider();
     }
 
     private void OnEnable()
     {
         GameEvents.Listen(EventType.PLAYER_EVENT_ON_SPAWN, OnPlayerSpawn);
-        GameEvents.Listen(EventType.INFO_POOL_EVENT_ON_CHANGE, OnPoolChanged);
     }
 
     private void OnDisable()
     {
         GameEvents.Unlisten(EventType.PLAYER_EVENT_ON_SPAWN, OnPlayerSpawn);
-        GameEvents.Unlisten(EventType.INFO_POOL_EVENT_ON_CHANGE, OnPoolChanged);
     }
 
     #region 角色生成初始化
@@ -41,7 +38,6 @@ public class SealEnvironmentStateMachineController : MonoBehaviour
         if (args == null) return;
         if ((GameObject)args.Player != gameObject) return;
 
-        ResolveWaterCollider();
         InitializeState();
     }
 
@@ -50,27 +46,6 @@ public class SealEnvironmentStateMachineController : MonoBehaviour
         isInWater = CheckIsInWater();
         RecalculateWallGroundContacts();
         UpdateEnvironment();
-    }
-
-    #endregion
-
-    #region 信息池监听（水体动态注册/注销）
-
-    private void OnPoolChanged(IGameEvent evt)
-    {
-        var args = evt as InfoPoolEventArgs;
-        if (args == null || args.Key != "Watter") return;
-
-        if (args.Type == InfoPoolEventArgs.ChangeType.Set)
-            ResolveWaterCollider();
-        else if (args.Type == InfoPoolEventArgs.ChangeType.Remove)
-            waterCollider = null;
-    }
-
-    private void ResolveWaterCollider()
-    {
-        if (InformationPool.TryGet("Watter", out object obj) && obj is Component comp)
-            waterCollider = comp.GetComponent<CompositeCollider2D>();
     }
 
     #endregion
@@ -87,16 +62,27 @@ public class SealEnvironmentStateMachineController : MonoBehaviour
     }
 
     /// <summary>
-    /// 使用 Collider2D.Distance 判断海豹碰撞体是否与水体碰撞体重叠。
+    /// 使用 Collider2D.Distance 判断海豹碰撞体是否与任意水体碰撞体重叠。
     /// 替代 OverlapPoint，因为 CompositeCollider2D 的 GeometryType=Outlines
     /// 生成的是边缘碰撞体（没有"内部"），OverlapPoint 永远无法命中。
     /// Distance 方法直接比较两个碰撞体的几何关系，不受 GeometryType 影响。
     /// </summary>
     private bool CheckIsInWater()
     {
-        if (waterCollider == null || sealCollider == null) return false;
-        var dist = waterCollider.Distance(sealCollider);
-        return dist.isOverlapped;
+        if (sealCollider == null) return false;
+
+        if (!InformationPool.TryGet("WatterList", out List<WatterController> waterList) || waterList == null)
+            return false;
+
+        foreach (var wc in waterList)
+        {
+            if (wc == null) continue;
+            var col = wc.GetComponent<CompositeCollider2D>();
+            if (col == null) continue;
+            var dist = col.Distance(sealCollider);
+            if (dist.isOverlapped) return true;
+        }
+        return false;
     }
 
     #endregion

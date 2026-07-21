@@ -20,7 +20,14 @@ public class SealModel : MonoBehaviour
 
     [FoldoutGroup("氧气系统", expanded: true)]
     [ShowInInspector, ReadOnly, ProgressBar(0, nameof(OxygenMaxValue)), LabelText("当前氧气")]
-    public float OxygenValue { get; set; }
+    public float OxygenValue
+    {
+        get => oxygenValue;
+        set => oxygenValue = value;
+    }
+
+    [SerializeField, HideInInspector]
+    private float oxygenValue;
 
     [FoldoutGroup("氧气系统")]
     [LabelText("最大氧气"), MinValue(1), SuffixLabel("单位", Overlay = true)]

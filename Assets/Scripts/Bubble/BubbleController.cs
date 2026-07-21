@@ -8,7 +8,6 @@ public class BubbleController : MonoBehaviour
     private BubbleBase bubbleBase;
     private float speed;
 
-    private GameObject water;
     private GameObject wall;
     private GameObject seal;
     private GameObject seagrass;
@@ -23,7 +22,6 @@ public class BubbleController : MonoBehaviour
         speed = bubbleBase.speed;
         rb.velocity = Vector2.up * speed;
 
-        water = ResolveGameObject("Watter");
         wall = ResolveGameObject("Wall");
         seal = ResolveGameObject("Seal");
         seagrass = ResolveGameObject("Seagrass");
@@ -70,7 +68,7 @@ public class BubbleController : MonoBehaviour
 
         GameObject other = args.Source == this.gameObject ? args.Target : args.Source;
 
-        if (other == water)
+        if (IsWaterObject(other))
         {
             lastWaterContactTime = Time.time;
         }
@@ -82,7 +80,7 @@ public class BubbleController : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject == water)
+        if (IsWaterObject(other.gameObject))
         {
             lastWaterContactTime = Time.time;
         }
@@ -90,10 +88,24 @@ public class BubbleController : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject == water)
+        if (IsWaterObject(collision.gameObject))
         {
             lastWaterContactTime = Time.time;
         }
+    }
+
+    /// <summary>检查 GameObject 是否为任一水体对象</summary>
+    private static bool IsWaterObject(GameObject go)
+    {
+        if (go == null) return false;
+        if (!InformationPool.TryGet("WatterList", out System.Collections.Generic.List<WatterController> list) || list == null)
+            return false;
+        foreach (var wc in list)
+        {
+            if (wc != null && wc.gameObject == go)
+                return true;
+        }
+        return false;
     }
 
     private static GameObject ResolveGameObject(string key)

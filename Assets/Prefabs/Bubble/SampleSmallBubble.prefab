@@ -12,11 +12,11 @@ GameObject:
   - component: {fileID: 5092087446899124210}
   - component: {fileID: 3361983675437399575}
   - component: {fileID: 645722474743262640}
-  - component: {fileID: -8128119179514021180}
+  - component: {fileID: -2495155886697768954}
   - component: {fileID: -1397927398209080573}
-  - component: {fileID: -777539408755825350}
+  - component: {fileID: 8719603207518846707}
   m_Layer: 7
-  m_Name: SampleBigBubble
+  m_Name: SampleSmallBubble
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -151,7 +151,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.1
---- !u!114 &-8128119179514021180
+--- !u!114 &-2495155886697768954
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -160,12 +160,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4361703366834461163}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 273897f4a8f01034c854a2a7f7849b18, type: 3}
+  m_Script: {fileID: 11500000, guid: 182d4cba21690ca42ab9fa7812744d39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  oxygen: 8
-  speed: 1
-  outOfWaterBurstDelay: 0.2
+  oxygen: 0
+  speed: 0
+  outOfWaterBurstDelay: 1
 --- !u!114 &-1397927398209080573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -178,7 +178,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af62351b5fcea1a4ea7b261b2b9f9569, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-777539408755825350
+--- !u!114 &8719603207518846707
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -187,6 +187,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4361703366834461163}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d17c588d668d7b7498e03c877730f74a, type: 3}
+  m_Script: {fileID: 11500000, guid: 434f188747559a7439a0d9291869cd7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
