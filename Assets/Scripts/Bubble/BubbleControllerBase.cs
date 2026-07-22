@@ -9,8 +9,6 @@ public abstract class BubbleControllerBase : MonoBehaviour
     protected GameObject seal;
     protected GameObject spike;
 
-    protected int waterLayerMask;
-
     protected virtual void Start()
     {
         bubbleBase = GetComponent<BubbleBase>();
@@ -20,8 +18,6 @@ public abstract class BubbleControllerBase : MonoBehaviour
 
         seal = ResolveGameObject("Seal");
         spike = ResolveGameObject("Spike");
-
-        waterLayerMask = 1 << LayerMask.NameToLayer("Watter");
     }
 
     private void OnEnable()
@@ -38,8 +34,7 @@ public abstract class BubbleControllerBase : MonoBehaviour
 
     protected virtual void Update()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, bubbleBase.outOfWaterBurstDistance, waterLayerMask);
-        if (hit.collider == null)
+        if (!WatterUtils.HasWaterBelow(transform.position, bubbleBase.outOfWaterBurstDistance))
         {
             bubbleBase.Burst();
         }

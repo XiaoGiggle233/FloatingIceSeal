@@ -7,17 +7,12 @@ using UnityEngine;
 /// </summary>
 public class SealOxygenController : MonoBehaviour
 {
-    [SerializeField] private LayerMask waterLayerMask;
-
     private Seal seal;
     private SealModel model;
     private Collider2D sealCollider;
 
     private void Awake()
     {
-        if (waterLayerMask.value == 0)
-            waterLayerMask = LayerMask.GetMask("Watter");
-
         seal = GetComponent<Seal>();
         model = GetComponent<SealModel>();
         sealCollider = GetComponent<Collider2D>();
@@ -97,23 +92,11 @@ public class SealOxygenController : MonoBehaviour
         float charHeight = charTop - charBottom;
         if (charHeight <= 0f) return 1f;
 
-        float waterSurfaceY = GetWaterSurfaceY(bounds.center.x, waterCollider);
+        float waterSurfaceY = WatterUtils.GetWaterSurfaceY(bounds.center.x);
         if (waterSurfaceY <= charBottom) return 1f;
         if (waterSurfaceY >= charTop) return 0f;
 
         return (charTop - waterSurfaceY) / charHeight;
-    }
-
-    /// <summary>通过射线检测获取指定 X 坐标处的水面 Y 值</summary>
-    private float GetWaterSurfaceY(float x, CompositeCollider2D waterCollider)
-    {
-        Vector2 origin = new Vector2(x, waterCollider.bounds.max.y + 10f);
-
-        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, Mathf.Infinity, waterLayerMask);
-        if (hit.collider != null)
-            return hit.point.y;
-
-        return float.MinValue;
     }
 
     #endregion
