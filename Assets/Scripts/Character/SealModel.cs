@@ -62,6 +62,11 @@ public class SealModel : MonoBehaviour
     [SerializeField] public float OxygenCriticalThreshold = 0f;
 
     [FoldoutGroup("氧气系统")]
+    [LabelText("窒息死亡倒计时"), MinValue(0), SuffixLabel("秒", Overlay = true)]
+    [PropertyTooltip("进入窒息状态后，倒计时结束则角色死亡")]
+    [SerializeField] public float SuffocatingDeathTimer = 5f;
+
+    [FoldoutGroup("氧气系统")]
     [LabelText("露出水面回复阈值"), PropertyRange(0, 1), SuffixLabel("%", Overlay = true)]
     [PropertyTooltip("角色露出水面的比例高于此值时开始回复氧气")]
     [SerializeField] public float OxygenRecoverExposeRatio = 0.5f;

@@ -360,6 +360,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5133253584458040315, guid: 1a8fc96920e73f5439982f4f3853c615, type: 3}
+      propertyPath: OxygenCriticalThreshold
+      value: 0.01
+      objectReference: {fileID: 0}
     - target: {fileID: 6676431114199775977, guid: 1a8fc96920e73f5439982f4f3853c615, type: 3}
       propertyPath: m_Name
       value: SampleSeal
