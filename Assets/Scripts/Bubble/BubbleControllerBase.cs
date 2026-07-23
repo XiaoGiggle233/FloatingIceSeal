@@ -48,7 +48,11 @@ public abstract class BubbleControllerBase : MonoBehaviour
 
         GameObject other = args.Source == this.gameObject ? args.Target : args.Source;
 
-        if (other == seal || other == spike)
+        // 动态从信息池获取 Seal，避免缓存已销毁的旧引用
+        var currentSeal = ResolveGameObject("Seal");
+        var currentSpike = ResolveGameObject("Spike");
+
+        if (other == currentSeal || other == currentSpike)
         {
             bubbleBase.Burst();
         }

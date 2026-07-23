@@ -117,7 +117,11 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
 
     private void OnDestroy()
     {
-        InformationPool.Remove("Seal");
+        // 仅当信息池中仍是自身时才移除，避免误删重生后的新实例
+        if (InformationPool.TryGet("Seal", out Seal current) && current == this)
+        {
+            InformationPool.Remove("Seal");
+        }
     }
 
     private void Update()
