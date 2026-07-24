@@ -152,12 +152,12 @@ MonoBehaviour:
   OxygenInsufficientThreshold: 0.25
   OxygenCriticalThreshold: 0.01
   SuffocatingDeathTimer: 2
-  OxygenRecoverExposeRatio: 0.5
-  AirMoveSpeed: 3
-  LandMoveSpeed: 2
-  WaterMoveSpeed: 4
-  DashSpeed: 10
-  DashDistance: 5
+  OxygenRecoverExposeRatio: 0.1
+  AirMoveSpeed: 1.5
+  LandMoveSpeed: 1
+  WaterMoveSpeed: 2
+  DashSpeed: 5
+  DashDistance: 2.5
   DashOxygenCost: 15
   VelocitySmoothTime: 0.1
   BlowBubbleChargeOxygenRate: 15
@@ -165,20 +165,20 @@ MonoBehaviour:
   BubbleOxygenRecoverRatio: 0.9
   GravityScale: 2
   OxygenFullShape:
-    radius: 0.9
+    radius: 0.1
     rectHeight: 0
   OxygenSufficientShape:
-    radius: 0.6
-    rectHeight: 0.2
+    radius: 0.04
+    rectHeight: 0.02
   OxygenInsufficientShape:
-    radius: 0.35
-    rectHeight: 0.5
+    radius: 0.05
+    rectHeight: 0.06
   OxygenCriticalShape:
-    radius: 0.25
-    rectHeight: 0.6
+    radius: 0.05
+    rectHeight: 0.07
   SuffocatingShape:
-    radius: 0.2
-    rectHeight: 0.75
+    radius: 0.04
+    rectHeight: 0.09
 --- !u!114 &3979857987247524582
 MonoBehaviour:
   m_ObjectHideFlags: 0
