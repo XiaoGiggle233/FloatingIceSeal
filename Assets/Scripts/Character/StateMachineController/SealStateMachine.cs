@@ -236,7 +236,7 @@ public class EnvironmentStateMachine
 
 #region ========== 4. 动作状态机 (ActionStateMachine) ==========
 
-public enum ActionState { Idle, OnLandMoving, InWaterMoving, Dashing }
+public enum ActionState { Idle, Moving, Dashing }
 
 public abstract class ActionStateBase : SealState<ActionStateMachine>
 {
@@ -248,14 +248,9 @@ public class IdleState : ActionStateBase
     public IdleState(Seal owner, ActionStateMachine fsm) : base(owner, fsm) { }
 }
 
-public class OnLandMovingState : ActionStateBase
+public class MovingState : ActionStateBase
 {
-    public OnLandMovingState(Seal owner, ActionStateMachine fsm) : base(owner, fsm) { }
-}
-
-public class InWaterMovingState : ActionStateBase
-{
-    public InWaterMovingState(Seal owner, ActionStateMachine fsm) : base(owner, fsm) { }
+    public MovingState(Seal owner, ActionStateMachine fsm) : base(owner, fsm) { }
 }
 
 public class DashingState : ActionStateBase
@@ -271,16 +266,14 @@ public class ActionStateMachine
     private ActionStateBase currentLeafState;
 
     public IdleState IdleState { get; }
-    public OnLandMovingState OnLandMovingState { get; }
-    public InWaterMovingState InWaterMovingState { get; }
+    public MovingState MovingState { get; }
     public DashingState DashingState { get; }
 
     public ActionStateMachine(Seal owner)
     {
         this.owner = owner;
         IdleState = new IdleState(owner, this);
-        OnLandMovingState = new OnLandMovingState(owner, this);
-        InWaterMovingState = new InWaterMovingState(owner, this);
+        MovingState = new MovingState(owner, this);
         DashingState = new DashingState(owner, this);
     }
 
@@ -304,8 +297,7 @@ public class ActionStateMachine
     }
 
     public bool IsIdle() => CurrentState == ActionState.Idle;
-    public bool IsOnLandMoving() => CurrentState == ActionState.OnLandMoving;
-    public bool IsInWaterMoving() => CurrentState == ActionState.InWaterMoving;
+    public bool IsMoving() => CurrentState == ActionState.Moving;
     public bool IsDashing() => CurrentState == ActionState.Dashing;
 }
 

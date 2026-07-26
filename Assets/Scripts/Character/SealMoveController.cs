@@ -162,24 +162,6 @@ public class SealMoveController : MonoBehaviour
     {
         float speed = GetCurrentMoveSpeed();
         moveTargetVelocity = input * speed;
-
-        // 更新动作状态
-        ActionState newState;
-        if (input.sqrMagnitude > 0.01f)
-        {
-            if (seal.EnvironmentStateMachine.IsInWater())
-                newState = ActionState.InWaterMoving;
-            else if (seal.EnvironmentStateMachine.IsOnLand())
-                newState = ActionState.OnLandMoving;
-            else
-                newState = ActionState.Idle;
-        }
-        else
-        {
-            newState = ActionState.Idle;
-        }
-
-        seal.ActionStateMachine.SetState(newState);
     }
 
     private float GetCurrentMoveSpeed()
@@ -199,7 +181,6 @@ public class SealMoveController : MonoBehaviour
         isDashing = true;
         dashTimer = model.DashDistance / model.DashSpeed;
         moveTargetVelocity = direction * model.DashSpeed;
-        seal.ActionStateMachine.SetState(ActionState.Dashing);
         GameEvents.Publish(EventType.PLAYER_EVENT_ON_DASH,
             new PlayerEventArgs(this.gameObject));
     }
@@ -211,7 +192,6 @@ public class SealMoveController : MonoBehaviour
         moveTargetVelocity = Vector2.zero;
         velocityRef = Vector2.zero;
         gravityVelocity = 0f;
-        seal.ActionStateMachine.SetState(ActionState.Idle);
     }
 
     #endregion

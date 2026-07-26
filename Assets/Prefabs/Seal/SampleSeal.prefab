@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4333769508640493303}
   - component: {fileID: 6285522828832397599}
   - component: {fileID: 8860540793689473529}
+  - component: {fileID: -3489017346826168952}
   - component: {fileID: -660928319200072241}
   m_Layer: 6
   m_Name: SampleSeal
@@ -310,6 +311,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocityThreshold: 0.01
+--- !u!114 &-3489017346826168952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6676431114199775977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae510d2f565b8844fa1e80b7ec61b69e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  idleSpeedThreshold: 0.01
 --- !u!114 &-660928319200072241
 MonoBehaviour:
   m_ObjectHideFlags: 0
