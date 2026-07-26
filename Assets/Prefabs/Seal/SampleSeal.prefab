@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 8860540793689473529}
   - component: {fileID: -3489017346826168952}
   - component: {fileID: -660928319200072241}
+  - component: {fileID: 7993961136352694905}
   m_Layer: 6
   m_Name: SampleSeal
   m_TagString: Untagged
@@ -86,12 +87,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 8
-  m_Sprite: {fileID: 21300000, guid: a0543ab221e83124fa3a02f2bcf3977b, type: 3}
+  m_Sprite: {fileID: 131344992, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.5, y: 0.36}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -336,3 +337,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aba1d7527ea50d443a41524e2e99dc2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7993961136352694905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6676431114199775977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0e4a56c7012c10449daa471c1828d17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  oxygenFullSprite: {fileID: 131344992, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
+  oxygenSufficientSprite: {fileID: -1205429656, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
+  oxygenInsufficientSprite: {fileID: 258695548, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
+  oxygenCriticalSprite: {fileID: 222216026, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
+  suffocatingSprite: {fileID: -753582365, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
+  deadSprite: {fileID: -1153952853, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
