@@ -163,7 +163,7 @@ MonoBehaviour:
   DashOxygenCost: 15
   VelocitySmoothTime: 0.1
   BlowBubbleChargeOxygenRate: 15
-  BlowBubbleSpawnOffset: 1
+  BlowBubbleSpawnOffset: 0.2
   BubbleOxygenRecoverRatio: 0.9
   GravityScale: 2
   OxygenFullShape:

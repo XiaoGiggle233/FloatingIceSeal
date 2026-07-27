@@ -45,6 +45,12 @@ public enum EventType
     UI_EVENT_ON_SLIDER_CHANGE,      // UI 滑块值变化
     UI_EVENT_SHOW_MESSAGE,          // UI 显示提示消息
     UI_EVENT_SHOW_DIALOG,           // UI 显示对话框
+    UI_EVENT_ON_START_GAME,         // 开始游戏按钮
+    UI_EVENT_ON_SWITCH_SAVE,        // 切换存档按钮
+    UI_EVENT_ON_SETTINGS,           // 设置按钮
+    UI_EVENT_ON_CREDITS,            // 制作人员表按钮
+    UI_EVENT_ON_EXIT_GAME,          // 退出游戏按钮
+    UI_EVENT_ON_RESET_LEVEL,        // 重置关卡按钮
 
     // ==================== 输入事件 ====================
     INPUT_EVENT_ON_SELECT,          // 选中目标

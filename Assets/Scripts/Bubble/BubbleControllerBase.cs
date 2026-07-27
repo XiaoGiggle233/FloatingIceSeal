@@ -24,12 +24,14 @@ public abstract class BubbleControllerBase : MonoBehaviour
     {
         GameEvents.Listen(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
         GameEvents.Listen(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
+        GameEvents.Listen(EventType.PLAYER_EVENT_ON_DEATH, OnPlayerDeath);
     }
 
     private void OnDisable()
     {
         GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
         GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
+        GameEvents.Unlisten(EventType.PLAYER_EVENT_ON_DEATH, OnPlayerDeath);
     }
 
     protected virtual void Update()
@@ -56,6 +58,11 @@ public abstract class BubbleControllerBase : MonoBehaviour
         {
             bubbleBase.Burst();
         }
+    }
+
+    private void OnPlayerDeath(IGameEvent evt)
+    {
+        bubbleBase.Burst();
     }
 
     protected static GameObject ResolveGameObject(string key)
