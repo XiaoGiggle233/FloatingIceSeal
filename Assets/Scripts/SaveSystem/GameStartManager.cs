@@ -33,6 +33,7 @@ public class GameStartManager : MonoBehaviour
         }
 
         string sceneName = $"Level{save.currentLevel}";
+        InformationPool.Set("CurrentSlotIndex", _currentSlotIndex);
         SceneManager.LoadScene(sceneName);
     }
 

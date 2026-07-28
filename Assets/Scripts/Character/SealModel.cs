@@ -133,6 +133,22 @@ public class SealModel : MonoBehaviour
 
     #endregion
 
+    #region 受伤
+
+    [FoldoutGroup("受伤", expanded: false)]
+    [LabelText("无敌时间"), MinValue(0), SuffixLabel("秒", Overlay = true)]
+    [SerializeField] public float InvincibilityDuration = 2f;
+
+    [FoldoutGroup("受伤")]
+    [LabelText("击退速度"), MinValue(0), SuffixLabel("m/s", Overlay = true)]
+    [SerializeField] public float HurtBounceSpeed = 5f;
+
+    [FoldoutGroup("受伤")]
+    [LabelText("击退距离"), MinValue(0), SuffixLabel("m", Overlay = true)]
+    [SerializeField] public float HurtBounceDistance = 1.5f;
+
+    #endregion
+
     #region 体型
 
     [FoldoutGroup("体型（胶囊体参数）", expanded: false)]

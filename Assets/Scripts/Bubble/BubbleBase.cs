@@ -19,21 +19,27 @@ public abstract class BubbleBase : MonoBehaviour, ICollisionEventPublisher
 
     #region 碰撞检测
 
-    public void PublishCollisionEvent(GameObject other)
+    public void PublishCollisionEvent(GameObject other, Vector2 normal)
     {
         GameEvents.Publish(EventType.COLLISION_EVENT_ON_ENTER,
-            new CollisionEventArgs(this.gameObject, other));
+            new CollisionEventArgs(this.gameObject, other, normal));
+    }
+
+    public void PublishTriggerEvent(GameObject other)
+    {
+        GameEvents.Publish(EventType.COLLISION_EVENT_ON_TRIGGER,
+            new CollisionEventArgs(this.gameObject, other, Vector2.zero));
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        PublishCollisionEvent(collision.gameObject);
+        Vector2 normal = collision.contactCount > 0 ? collision.contacts[0].normal : Vector2.zero;
+        PublishCollisionEvent(collision.gameObject, normal);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        GameEvents.Publish(EventType.COLLISION_EVENT_ON_TRIGGER,
-            new CollisionEventArgs(this.gameObject, other.gameObject));
+        PublishTriggerEvent(other.gameObject);
     }
 
     private void OnCollisionEvent(IGameEvent evt)

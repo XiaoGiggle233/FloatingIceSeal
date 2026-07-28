@@ -284,11 +284,14 @@ public class CollisionEventArgs : GameEventBase
     public GameObject Source { get; }
     /// <summary>被碰撞对象</summary>
     public GameObject Target { get; }
+    /// <summary>碰撞法线</summary>
+    public Vector2 Normal { get; }
 
-    public CollisionEventArgs(GameObject source, GameObject target)
+    public CollisionEventArgs(GameObject source, GameObject target, Vector2 normal)
     {
         Source = source;
         Target = target;
+        Normal = normal;
     }
 }
 

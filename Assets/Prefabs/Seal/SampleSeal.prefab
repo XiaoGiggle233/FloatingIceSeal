@@ -166,6 +166,9 @@ MonoBehaviour:
   BlowBubbleSpawnOffset: 0.2
   BubbleOxygenRecoverRatio: 0.9
   GravityScale: 2
+  InvincibilityDuration: 2
+  HurtBounceSpeed: 5
+  HurtBounceDistance: 0.5
   OxygenFullShape:
     radius: 0.1
     rectHeight: 0

@@ -27,6 +27,10 @@ public class SealMoveController : MonoBehaviour
     private float gravityVelocity;
     private bool isDashing;
     private float dashTimer;
+    private bool isInvincible;
+    private float invincibilityTimer;
+    private bool isHurtBouncing;
+    private float hurtBounceTimer;
 
     private void Awake()
     {
@@ -37,9 +41,31 @@ public class SealMoveController : MonoBehaviour
         rb.gravityScale = 0f; // 自行管理重力逻辑
     }
 
+    private void OnEnable()
+    {
+        GameEvents.Listen(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
+    }
+
     private void Update()
     {
         if (!seal.LifeStateMachine.IsAlive()) return;
+
+        UpdateInvincibility();
+
+        if (isHurtBouncing)
+        {
+            hurtBounceTimer -= Time.deltaTime;
+            if (hurtBounceTimer <= 0f)
+            {
+                EndHurtBounce();
+            }
+            return;
+        }
 
         if (isDashing)
         {
@@ -66,7 +92,7 @@ public class SealMoveController : MonoBehaviour
 
         ApplyGravity();
 
-        if (isDashing)
+        if (isDashing || isHurtBouncing)
         {
             rb.velocity = moveTargetVelocity;
             return;
@@ -192,6 +218,63 @@ public class SealMoveController : MonoBehaviour
         moveTargetVelocity = Vector2.zero;
         velocityRef = Vector2.zero;
         gravityVelocity = 0f;
+    }
+
+    #endregion
+
+    #region 碰撞受伤
+
+    private void OnCollisionEvent(IGameEvent evt)
+    {
+        var args = evt as CollisionEventArgs;
+        if (args == null) return;
+        if (args.Source != this.gameObject) return;
+
+        if (!isDashing || isInvincible) return;
+        if (!IsSpike(args.Target)) return;
+
+        EndDash();
+        ApplyHurtBounce(args.Normal);
+        EnterInvincibility();
+    }
+
+    private void ApplyHurtBounce(Vector2 normal)
+    {
+        isHurtBouncing = true;
+        hurtBounceTimer = model.HurtBounceDistance / model.HurtBounceSpeed;
+        moveTargetVelocity = normal * model.HurtBounceSpeed;
+        gravityVelocity = 0f;
+    }
+
+    private void EndHurtBounce()
+    {
+        isHurtBouncing = false;
+        moveTargetVelocity = Vector2.zero;
+        velocityRef = Vector2.zero;
+    }
+
+    private void EnterInvincibility()
+    {
+        isInvincible = true;
+        invincibilityTimer = model.InvincibilityDuration;
+    }
+
+    private void UpdateInvincibility()
+    {
+        if (!isInvincible) return;
+
+        invincibilityTimer -= Time.deltaTime;
+        if (invincibilityTimer <= 0f)
+        {
+            isInvincible = false;
+        }
+    }
+
+    private static bool IsSpike(GameObject obj)
+    {
+        return InformationPool.TryGet("Spike", out object spike)
+            && ((spike is GameObject go && go == obj)
+                || (spike is Component comp && comp.gameObject == obj));
     }
 
     #endregion
