@@ -230,7 +230,16 @@ public class SealMoveController : MonoBehaviour
         if (args == null) return;
         if (args.Source != this.gameObject) return;
 
-        if (!isDashing || isInvincible) return;
+        if (!isDashing) return;
+
+        // 冲刺中碰到物体，且在空中或陆地（非水中），停止冲刺（防止卡天花板/墙壁）
+        if (seal.EnvironmentStateMachine.IsInAir() || seal.EnvironmentStateMachine.IsOnLand())
+        {
+            EndDash();
+            return;
+        }
+
+        if (isInvincible) return;
         if (!IsSpike(args.Target)) return;
 
         EndDash();

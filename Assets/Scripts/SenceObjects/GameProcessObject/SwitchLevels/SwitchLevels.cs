@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class SwitchLevels : MonoBehaviour
 {
+    [SerializeField] private int _currentLevel = 1;
+
     private bool _isSwitching = false;
 
     private void OnEnable()
@@ -49,9 +51,8 @@ public class SwitchLevels : MonoBehaviour
         // 获取当前存档槽位
         int slotIndex = InformationPool.Get<int>("CurrentSlotIndex", 0);
 
-        // 读取当前关卡并 +1
-        SaveData save = SaveManager.Load(slotIndex);
-        int nextLevel = (save != null && !save.isEmpty) ? save.currentLevel + 1 : 2;
+        // 根据场景中存储的当前关卡数计算下一关
+        int nextLevel = _currentLevel + 1;
 
         // 更新存档
         SaveManager.SetCurrentLevel(slotIndex, nextLevel);

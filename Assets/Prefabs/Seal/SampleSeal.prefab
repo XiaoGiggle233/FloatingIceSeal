@@ -158,12 +158,12 @@ MonoBehaviour:
   AirMoveSpeed: 1.5
   LandMoveSpeed: 1
   WaterMoveSpeed: 2
-  DashSpeed: 5
+  DashSpeed: 4
   DashDistance: 2.5
   DashOxygenCost: 15
   VelocitySmoothTime: 0.1
   BlowBubbleChargeOxygenRate: 15
-  BlowBubbleSpawnOffset: 0.2
+  BlowBubbleSpawnOffset: 0.3
   BubbleOxygenRecoverRatio: 0.9
   GravityScale: 2
   InvincibilityDuration: 2
