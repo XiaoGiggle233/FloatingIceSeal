@@ -202,6 +202,18 @@ public class UIMessageEventArgs : GameEventBase
     }
 }
 
+/// <summary>UI 按钮点击事件参数</summary>
+public class ButtonClickEventArgs : GameEventBase
+{
+    /// <summary>按钮标识名</summary>
+    public string ButtonName { get; }
+
+    public ButtonClickEventArgs(string buttonName)
+    {
+        ButtonName = buttonName;
+    }
+}
+
 // ==================== 输入事件参数 ====================
 
 /// <summary>选中事件参数</summary>

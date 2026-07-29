@@ -13,8 +13,6 @@ argument-hint: '[Camera 或 UI 元素描述]'
 PixelPerfectCamera 以固定的参考分辨率（如 384×216）渲染游戏画面，然后放大到实际屏幕。CanvasScaler 的参考分辨率应与之一致，UI 元素的尺寸才能与游戏世界中的像素对应。
 
 **关键映射关系：**
-- `PixelPerfectCamera.refResolutionX × refResolutionY` = CanvasScaler 参考分辨率
-- `PixelPerfectCamera.assetsPPU` = Canvas 的 `referencePixelsPerUnit`
 - UI 元素的 `RectTransform.sizeDelta` = 在参考分辨率中的像素尺寸
 
 ## 步骤
@@ -24,7 +22,7 @@ PixelPerfectCamera 以固定的参考分辨率（如 384×216）渲染游戏画�
 ```csharp
 var cam = Camera.main;
 var ppc = cam.GetComponent<UnityEngine.Experimental.Rendering.Universal.PixelPerfectCamera>();
-// 记录：ppc.refResolutionX, ppc.refResolutionY, ppc.assetsPPU
+// 记录：ppc.refResolutionX, ppc.refResolutionY
 ```
 
 ### 步骤 2：配置 Canvas
@@ -44,13 +42,8 @@ c.sortingOrder = 100;  // 确保 UI 渲染在场景物体之上
 ```csharp
 var scaler = canvas.GetComponent<CanvasScaler>();
 
-// 匹配 PixelPerfectCamera 的参考分辨率
 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-scaler.referenceResolution = new Vector2(ppc.refResolutionX, ppc.refResolutionY);
 scaler.matchWidthOrHeight = 1f;  // 按高度匹配（推荐），或 0.5f 取平均
-
-// PPU 保持一致
-scaler.referencePixelsPerUnit = ppc.assetsPPU;
 ```
 
 ### 步骤 4：按虚拟像素设置 UI 元素尺寸
@@ -89,3 +82,4 @@ c.sortingOrder = 100;
 | UI 被场景物体遮挡 | Canvas.sortingOrder 太低 | 设为 ≥ 100 |
 | UI 大小与游戏不匹配 | CanvasScaler 参考分辨率与 PPC 不一致 | 对齐参考分辨率 |
 | Canvas 渲染模式不对 | 误用 WorldSpace 或 Overlay | 使用 ScreenSpaceCamera |
+ Scaler 配置不当或 UI 元素尺寸不对 | 检查 Canvas Scaler 设置和元素尺寸
