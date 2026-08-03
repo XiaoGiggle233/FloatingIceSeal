@@ -32,11 +32,41 @@ public class SealCameraFollow : MonoBehaviour
     [SerializeField, LabelText("边界右下角")]
     private Transform _boundBottomRight;
 
+    [FoldoutGroup("跟随缓冲")]
+    [SerializeField, LabelText("缓冲宽度"), MinValue(0)]
+    public float FollowBufferWidth = 3f;
+
+    [FoldoutGroup("跟随缓冲")]
+    [SerializeField, LabelText("缓冲高度"), MinValue(0)]
+    public float FollowBufferHeight = 2f;
+
+    [FoldoutGroup("跟随缓冲")]
+    [SerializeField, LabelText("等比系数"), MinValue(1)]
+    public float RatioMultiplier = 2f;
+
+    [FoldoutGroup("跟随缓冲")]
+    [SerializeField, LabelText("速度等级距离"), SuffixLabel("m", Overlay = true), MinValue(0.01f)]
+    public float SpeedStepDistance = 2f;
+
     public Rigidbody2D TargetRb { get; private set; }
     public CameraStateMachine StateMachine { get; private set; }
+    private Camera _cam;
+
+    private Vector3 _cachedTopLeft;
+    private Vector3 _cachedBottomRight;
+    private bool _boundsCached;
+
+    [FoldoutGroup("调试", expanded: true)]
+    [ShowInInspector, ReadOnly, LabelText("当前摄像机状态")]
+    public CameraState CurrentCameraState => StateMachine?.CurrentState ?? CameraState.Follow;
+
+    [FoldoutGroup("调试")]
+    [ShowInInspector, ReadOnly, LabelText("当前状态对象")]
+    public string CurrentLeafState => StateMachine?.CurrentLeafStateName ?? "Null";
 
     private void Awake()
     {
+        _cam = GetComponent<Camera>();
         StateMachine = new CameraStateMachine(this);
     }
 
@@ -48,6 +78,7 @@ public class SealCameraFollow : MonoBehaviour
         if (_target != null)
             TargetRb = _target.GetComponent<Rigidbody2D>();
 
+        CacheBounds();
         StateMachine.EnterLeafState(StateMachine.FollowState);
         StateMachine.SetState(CameraState.Follow);
     }
@@ -62,31 +93,56 @@ public class SealCameraFollow : MonoBehaviour
             return;
         }
 
-        ApplyMovement();
         StateMachine.Update();
     }
 
-    private void ApplyMovement()
+    /// <summary>
+    /// 以指定速度朝向目标匀速移动（带边界钳制）
+    /// </summary>
+    public void MoveTo(Vector3 targetPos, float speed)
     {
-        Vector3 targetPos = (Vector3)MoveTarget + Offset;
         targetPos.z = transform.position.z;
-
         targetPos = ClampWithinBounds(targetPos);
-        transform.position = Vector3.MoveTowards(transform.position, targetPos, MoveSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
     }
 
-    private Vector3 ClampWithinBounds(Vector3 pos)
+    public Vector3 ClampWithinBounds(Vector3 pos)
     {
-        if (_boundTopLeft == null || _boundBottomRight == null) return pos;
+        if (!_boundsCached || _cam == null) return pos;
 
-        float minX = _boundTopLeft.position.x;
-        float maxX = _boundBottomRight.position.x;
-        float maxY = _boundTopLeft.position.y;
-        float minY = _boundBottomRight.position.y;
+        float minX = _cachedTopLeft.x;
+        float maxX = _cachedBottomRight.x;
+        float maxY = _cachedTopLeft.y;
+        float minY = _cachedBottomRight.y;
 
-        pos.x = Mathf.Clamp(pos.x, minX, maxX);
-        pos.y = Mathf.Clamp(pos.y, minY, maxY);
+        // 相机可视范围半宽半高
+        float halfHeight = _cam.orthographicSize;
+        float halfWidth = halfHeight * _cam.aspect;
+
+        // 可视范围大于边界时居中
+        if (maxX - minX < halfWidth * 2f)
+            pos.x = (minX + maxX) * 0.5f;
+        else
+            pos.x = Mathf.Clamp(pos.x, minX + halfWidth, maxX - halfWidth);
+
+        if (maxY - minY < halfHeight * 2f)
+            pos.y = (minY + maxY) * 0.5f;
+        else
+            pos.y = Mathf.Clamp(pos.y, minY + halfHeight, maxY - halfHeight);
+
         return pos;
+    }
+
+    /// <summary>
+    /// 缓存边界物体的世界坐标，供移动钳制使用
+    /// </summary>
+    public void CacheBounds()
+    {
+        if (_boundTopLeft == null || _boundBottomRight == null) return;
+
+        _cachedTopLeft = _boundTopLeft.position;
+        _cachedBottomRight = _boundBottomRight.position;
+        _boundsCached = true;
     }
 
     public void SetTarget(Seal seal)

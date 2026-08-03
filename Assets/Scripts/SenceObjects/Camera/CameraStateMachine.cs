@@ -30,6 +30,38 @@ public abstract class CameraStateBase
 public class CameraFollowState : CameraStateBase
 {
     public CameraFollowState(SealCameraFollow camera, CameraStateMachine fsm) : base(camera, fsm) { }
+
+    public override void Update()
+    {
+        if (camera.TargetRb == null) return;
+
+        Vector3 targetPos = camera.TargetRb.transform.position + camera.Offset;
+        Vector3 cameraPos = camera.transform.position;
+
+        float halfW = camera.FollowBufferWidth * 0.5f;
+        float halfH = camera.FollowBufferHeight * 0.5f;
+
+        Vector3 delta = targetPos - cameraPos;
+
+        // 角色在缓冲区内，不移动
+        if (Mathf.Abs(delta.x) <= halfW && Mathf.Abs(delta.y) <= halfH) return;
+
+        // 角色超出缓冲区的溢出距离
+        float overflowX = Mathf.Max(0f, Mathf.Abs(delta.x) - halfW);
+        float overflowY = Mathf.Max(0f, Mathf.Abs(delta.y) - halfH);
+        float overflow = new Vector2(overflowX, overflowY).magnitude;
+
+        // 等比速度：速度 = 基准速度 * 等比系数 ^ (溢出距离 / 速度等级距离)
+        float speed = camera.MoveSpeed * Mathf.Pow(camera.RatioMultiplier, overflow / camera.SpeedStepDistance);
+
+        // 目标为把角色拉回缓冲区边缘的位置
+        Vector3 moveTarget = cameraPos + new Vector3(
+            Mathf.Clamp(delta.x, -halfW, halfW),
+            Mathf.Clamp(delta.y, -halfH, halfH),
+            0f);
+
+        camera.MoveTo(moveTarget, speed);
+    }
 }
 
 #endregion
@@ -69,6 +101,8 @@ public class CameraStateMachine
 
     public CameraState CurrentState { get; private set; }
     private CameraStateBase currentLeafState;
+
+    public string CurrentLeafStateName => currentLeafState?.GetType().Name ?? "Null";
 
     public CameraFollowState FollowState { get; }
     public CameraLockState LockState { get; }
