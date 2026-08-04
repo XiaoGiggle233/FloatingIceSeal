@@ -103,7 +103,80 @@ public class CameraLockState : CameraStateBase
 
 public class CameraOverviewState : CameraStateBase
 {
+    private int _commandIndex;
+    private float _stayTimer;
+    private bool _returning;
+    private Vector3 _moveTarget;
+    private bool _hasMoveTarget;
+
     public CameraOverviewState(SealCameraFollow camera, CameraStateMachine fsm) : base(camera, fsm) { }
+
+    public override void Enter()
+    {
+        _commandIndex = 0;
+        _stayTimer = 0f;
+        _returning = false;
+        _hasMoveTarget = false;
+    }
+
+    public override void Update()
+    {
+        CameraOverviewData data = camera.ActiveOverviewData;
+        if (data == null || camera.TargetRb == null) return;
+
+        // 指令全部执行完毕，移回角色位置并恢复跟随
+        if (_returning)
+        {
+            Vector3 playerPos = camera.TargetRb.transform.position;
+            camera.MoveToUnclamped(playerPos, camera.OverviewReturnSpeed);
+
+            // 仅比较 XY，忽略相机与角色的 Z 差异
+            if (Vector2.Distance(camera.transform.position, playerPos) < 0.01f)
+                camera.ReleaseOverview();
+            return;
+        }
+
+        if (_commandIndex >= data.Commands.Count)
+        {
+            _returning = true;
+            return;
+        }
+
+        CameraOverviewCommand cmd = data.Commands[_commandIndex];
+        switch (cmd.Type)
+        {
+            case CameraOverviewCommandType.StartPosition:
+                camera.MoveToUnclamped(cmd.StartPosition, camera.OverviewStartSpeed);
+                // 仅比较 XY，忽略相机与指令位置的 Z 差异
+                if (Vector2.Distance(camera.transform.position, cmd.StartPosition) < 0.01f)
+                    _commandIndex++;
+                break;
+
+            case CameraOverviewCommandType.MoveDirection:
+                // 进入指令时计算一次固定终点，避免每帧重算导致永远追不上
+                if (!_hasMoveTarget)
+                {
+                    _moveTarget = camera.transform.position + (Vector3)cmd.MoveDirection.normalized * cmd.MoveDistance;
+                    _hasMoveTarget = true;
+                }
+                camera.MoveToUnclamped(_moveTarget, cmd.MoveSpeed);
+                if (Vector2.Distance(camera.transform.position, _moveTarget) < 0.01f)
+                {
+                    _commandIndex++;
+                    _hasMoveTarget = false;
+                }
+                break;
+
+            case CameraOverviewCommandType.Stay:
+                _stayTimer += Time.deltaTime;
+                if (_stayTimer >= cmd.StayTime)
+                {
+                    _stayTimer = 0f;
+                    _commandIndex++;
+                }
+                break;
+        }
+    }
 }
 
 #endregion

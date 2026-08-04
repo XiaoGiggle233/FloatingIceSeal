@@ -63,6 +63,19 @@ public class SealCameraFollow : MonoBehaviour
     public float OriginalViewSize { get; private set; }
     public bool RestoreView { get; private set; }
     public float ViewRestoreSpeed { get; private set; }
+    private bool _exitPending;
+    private float _lockExitTimer;
+
+    // 全览状态数据
+    public CameraOverviewData ActiveOverviewData { get; private set; }
+
+    [FoldoutGroup("全览设置")]
+    [SerializeField, LabelText("移动至起始速度"), MinValue(0.01f), SuffixLabel("unit/s", Overlay = true)]
+    public float OverviewStartSpeed = 5f;
+
+    [FoldoutGroup("全览设置")]
+    [SerializeField, LabelText("返回角色速度"), MinValue(0.01f), SuffixLabel("unit/s", Overlay = true)]
+    public float OverviewReturnSpeed = 5f;
 
     [FoldoutGroup("调试", expanded: true)]
     [ShowInInspector, ReadOnly, LabelText("当前摄像机状态")]
@@ -112,6 +125,17 @@ public class SealCameraFollow : MonoBehaviour
             return;
         }
 
+        // 退出锁定缓冲倒计时
+        if (_exitPending)
+        {
+            _lockExitTimer -= Time.deltaTime;
+            if (_lockExitTimer <= 0f)
+            {
+                _exitPending = false;
+                DoReleaseLock();
+            }
+        }
+
         StateMachine.Update();
     }
 
@@ -122,6 +146,15 @@ public class SealCameraFollow : MonoBehaviour
     {
         targetPos.z = transform.position.z;
         targetPos = ClampWithinBounds(targetPos);
+        transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
+    }
+
+    /// <summary>
+    /// 以指定速度朝向目标匀速移动（不做边界钳制，供全览使用）
+    /// </summary>
+    public void MoveToUnclamped(Vector3 targetPos, float speed)
+    {
+        targetPos.z = transform.position.z;
         transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
     }
 
@@ -201,6 +234,9 @@ public class SealCameraFollow : MonoBehaviour
     {
         if (data == null) return;
 
+        // 重新进入时取消待执行的退出
+        _exitPending = false;
+
         ActiveLockData = data;
         OriginalViewSize = _cam.orthographicSize;
         RestoreView = data.AdjustViewSize;
@@ -215,15 +251,51 @@ public class SealCameraFollow : MonoBehaviour
     }
 
     /// <summary>
-    /// 退出锁定状态：恢复跟随状态
+    /// 退出锁定状态：经缓冲时间后恢复跟随状态
     /// </summary>
     public void ReleaseLock()
     {
         if (!StateMachine.IsLock()) return;
 
+        _exitPending = true;
+        _lockExitTimer = ActiveLockData != null ? ActiveLockData.LockExitBufferTime : 0f;
+    }
+
+    private void DoReleaseLock()
+    {
         StateMachine.EnterLeafState(StateMachine.FollowState);
         StateMachine.SetState(CameraState.Follow);
         ActiveLockData = null;
+    }
+
+    /// <summary>
+    /// 进入全览状态：执行全览指令列表
+    /// </summary>
+    public void ApplyOverview(CameraOverviewData data)
+    {
+        if (data == null) return;
+
+        // 取消待执行的锁定退出
+        _exitPending = false;
+
+        ActiveOverviewData = data;
+        // PixelPerfectCamera 会强制覆盖位置，全览期间关闭
+        SetPixelPerfectEnabled(false);
+
+        StateMachine.EnterLeafState(StateMachine.OverviewState);
+        StateMachine.SetState(CameraState.Overview);
+    }
+
+    /// <summary>
+    /// 退出全览状态：恢复跟随状态
+    /// </summary>
+    public void ReleaseOverview()
+    {
+        if (!StateMachine.IsOverview()) return;
+
+        StateMachine.EnterLeafState(StateMachine.FollowState);
+        StateMachine.SetState(CameraState.Follow);
+        ActiveOverviewData = null;
     }
     public void SetTarget(Seal seal)
     {

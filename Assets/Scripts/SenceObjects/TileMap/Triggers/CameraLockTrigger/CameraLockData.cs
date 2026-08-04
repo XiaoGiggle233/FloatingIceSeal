@@ -24,6 +24,10 @@ public class CameraLockData
     [SerializeField, LabelText("视野过渡速度"), MinValue(0.01f), SuffixLabel("unit/s", Overlay = true), ShowIf(nameof(_adjustViewSize))]
     private float _viewTransitionSpeed = 2f;
 
+    [Title("退出")]
+    [SerializeField, LabelText("退出缓冲时间"), SuffixLabel("s", Overlay = true), MinValue(0), Tooltip("角色离开触发器后，经此时间才切换回跟随状态")]
+    private float _lockExitBufferTime = 1f;
+
     #region 属性
 
     public bool MoveToPosition => _moveToPosition;
@@ -31,6 +35,7 @@ public class CameraLockData
     public bool AdjustViewSize => _adjustViewSize;
     public float ViewSize => _viewSize;
     public float ViewTransitionSpeed => _viewTransitionSpeed;
+    public float LockExitBufferTime => _lockExitBufferTime;
 
     #endregion
 }
