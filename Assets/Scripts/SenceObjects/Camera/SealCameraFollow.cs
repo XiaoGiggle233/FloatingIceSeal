@@ -49,6 +49,22 @@ public class SealCameraFollow : MonoBehaviour
     [SerializeField, LabelText("速度等级距离"), SuffixLabel("m", Overlay = true), MinValue(0.01f)]
     public float SpeedStepDistance = 2f;
 
+    [FoldoutGroup("纵向缓冲")]
+    [SerializeField, LabelText("缓冲宽度"), MinValue(0)]
+    public float VerticalBufferWidth = 3f;
+
+    [FoldoutGroup("纵向缓冲")]
+    [SerializeField, LabelText("缓冲高度"), MinValue(0)]
+    public float VerticalBufferHeight = 2f;
+
+    [FoldoutGroup("纵向缓冲")]
+    [SerializeField, LabelText("等比系数"), MinValue(1)]
+    public float VerticalRatioMultiplier = 2f;
+
+    [FoldoutGroup("纵向缓冲")]
+    [SerializeField, LabelText("速度等级距离"), SuffixLabel("m", Overlay = true), MinValue(0.01f)]
+    public float VerticalSpeedStepDistance = 2f;
+
     public Rigidbody2D TargetRb { get; private set; }
     public CameraStateMachine StateMachine { get; private set; }
     private Camera _cam;
