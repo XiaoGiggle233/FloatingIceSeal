@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Experimental.Rendering.Universal;
 using Sirenix.OdinInspector;
 
 /// <summary>
@@ -51,10 +52,17 @@ public class SealCameraFollow : MonoBehaviour
     public Rigidbody2D TargetRb { get; private set; }
     public CameraStateMachine StateMachine { get; private set; }
     private Camera _cam;
+    private PixelPerfectCamera _pixelPerfect;
 
     private Vector3 _cachedTopLeft;
     private Vector3 _cachedBottomRight;
     private bool _boundsCached;
+
+    // 锁定状态数据
+    public CameraLockData ActiveLockData { get; private set; }
+    public float OriginalViewSize { get; private set; }
+    public bool RestoreView { get; private set; }
+    public float ViewRestoreSpeed { get; private set; }
 
     [FoldoutGroup("调试", expanded: true)]
     [ShowInInspector, ReadOnly, LabelText("当前摄像机状态")]
@@ -64,9 +72,20 @@ public class SealCameraFollow : MonoBehaviour
     [ShowInInspector, ReadOnly, LabelText("当前状态对象")]
     public string CurrentLeafState => StateMachine?.CurrentLeafStateName ?? "Null";
 
+    private void OnEnable()
+    {
+        InformationPool.Set("SealCameraFollow", this);
+    }
+
+    private void OnDisable()
+    {
+        InformationPool.Remove("SealCameraFollow");
+    }
+
     private void Awake()
     {
         _cam = GetComponent<Camera>();
+        _pixelPerfect = GetComponent<PixelPerfectCamera>();
         StateMachine = new CameraStateMachine(this);
     }
 
@@ -145,6 +164,67 @@ public class SealCameraFollow : MonoBehaviour
         _boundsCached = true;
     }
 
+    /// <summary>
+    /// 匀速过渡正交视野大小
+    /// </summary>
+    public void TransitionViewSize(float target, float speed)
+    {
+        _cam.orthographicSize = Mathf.MoveTowards(_cam.orthographicSize, target, speed * Time.deltaTime);
+    }
+
+    private void SetPixelPerfectEnabled(bool enabled)
+    {
+        if (_pixelPerfect != null && _pixelPerfect.enabled != enabled)
+            _pixelPerfect.enabled = enabled;
+    }
+
+    /// <summary>
+    /// 视野是否已恢复到原始大小
+    /// </summary>
+    public bool IsViewRestored()
+    {
+        return !RestoreView || Mathf.Approximately(_cam.orthographicSize, OriginalViewSize);
+    }
+
+    /// <summary>
+    /// 重新启用 Pixel Perfect Camera
+    /// </summary>
+    public void ReenablePixelPerfect()
+    {
+        SetPixelPerfectEnabled(true);
+    }
+
+    /// <summary>
+    /// 进入锁定状态：记录原视野，应用锁定数据
+    /// </summary>
+    public void ApplyLock(CameraLockData data)
+    {
+        if (data == null) return;
+
+        ActiveLockData = data;
+        OriginalViewSize = _cam.orthographicSize;
+        RestoreView = data.AdjustViewSize;
+        ViewRestoreSpeed = data.ViewTransitionSpeed;
+
+        // PixelPerfectCamera 会强制覆盖位置与视野，锁定期间关闭
+        if (data.MoveToPosition || data.AdjustViewSize)
+            SetPixelPerfectEnabled(false);
+
+        StateMachine.EnterLeafState(StateMachine.LockState);
+        StateMachine.SetState(CameraState.Lock);
+    }
+
+    /// <summary>
+    /// 退出锁定状态：恢复跟随状态
+    /// </summary>
+    public void ReleaseLock()
+    {
+        if (!StateMachine.IsLock()) return;
+
+        StateMachine.EnterLeafState(StateMachine.FollowState);
+        StateMachine.SetState(CameraState.Follow);
+        ActiveLockData = null;
+    }
     public void SetTarget(Seal seal)
     {
         _target = seal;

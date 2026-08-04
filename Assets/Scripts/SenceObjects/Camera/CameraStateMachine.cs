@@ -33,6 +33,16 @@ public class CameraFollowState : CameraStateBase
 
     public override void Update()
     {
+        // 退出锁定后恢复原视野
+        if (camera.RestoreView)
+        {
+            camera.TransitionViewSize(camera.OriginalViewSize, camera.ViewRestoreSpeed);
+
+            // 视野恢复完成后重新启用 Pixel Perfect Camera
+            if (camera.IsViewRestored())
+                camera.ReenablePixelPerfect();
+        }
+
         if (camera.TargetRb == null) return;
 
         Vector3 targetPos = camera.TargetRb.transform.position + camera.Offset;
@@ -71,6 +81,20 @@ public class CameraFollowState : CameraStateBase
 public class CameraLockState : CameraStateBase
 {
     public CameraLockState(SealCameraFollow camera, CameraStateMachine fsm) : base(camera, fsm) { }
+
+    public override void Update()
+    {
+        CameraLockData data = camera.ActiveLockData;
+        if (data == null) return;
+
+        // 移动到锁定位置
+        if (data.MoveToPosition)
+            camera.MoveTo(data.LockPosition, camera.MoveSpeed);
+
+        // 过渡到锁定视野
+        if (data.AdjustViewSize)
+            camera.TransitionViewSize(data.ViewSize, data.ViewTransitionSpeed);
+    }
 }
 
 #endregion
