@@ -306,6 +306,38 @@ private void OnNewBtn()
 | 场景接线 | 新增按钮的路径与 `Find<>` 路径一致 |
 | 功能测试 | Play 模式点击新/旧按钮，确认行为符合预期 |
 
+## 更新 UI 字体（TextMeshPro）
+
+替换场景中 TextMeshProUGUI 文本的字体（项目字体资产位于 `Assets/Resource/Fonts/`，均为 SDF 资产）：
+
+| 字体资产 | 说明 |
+|---------|------|
+| `Assets/Resource/Fonts/33236052BD7CC06BC1616035196 SDF.asset` | 默认中文字体 |
+| `Assets/Resource/Fonts/AlibabaPuHuiTi-3-115-Black SDF.asset` | 阿里普惠（粗黑） |
+
+### 操作步骤（MCP 工具）
+
+对每个文本对象执行 `manage_gameobject(action="modify", component_properties=...)`：
+
+```json
+{
+  "TextMeshProUGUI": {
+    "m_fontAsset": { "path": "Assets/Resource/Fonts/33236052BD7CC06BC1616035196 SDF.asset" }
+  }
+}
+```
+
+### 关键注意事项
+
+| # | 检查项 |
+|---|--------|
+| 1 | 属性名是 **`m_fontAsset`**（内部序列化名），不是 `font`（`font` 只读会报 "Property not found"） |
+| 2 | 定位用 `search_method="by_path"`（如 `Canvas/Title`），场景中有同名对象时按路径避免误改 |
+| 3 | **未激活（inactive）的面板对象无法用 by_path 搜索到** —— 先 `set_active: true` 激活，更新完再恢复隐藏 |
+| 4 | 多个文本批量更新用 `batch_execute`，每个对象一条命令 |
+| 5 | 仅改 `m_fontAsset`，**不要**改动 `RectTransform`/`anchoredPosition` 等位置属性（用户可能手动调过位置） |
+| 6 | 更新后需保存场景（MCP 改的是编辑器内存，Ctrl+S 落盘） |
+
 ## 常见陷阱（务必注意）
 
 ### 陷阱 1：未激活对象的 Awake 不执行

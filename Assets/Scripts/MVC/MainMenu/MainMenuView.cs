@@ -1,5 +1,4 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -46,19 +45,6 @@ public class MainMenuView : BaseView
         _settingsBtn?.onClick.AddListener(() => SettingsClicked?.Invoke());
         _creditsBtn?.onClick.AddListener(() => CreditsClicked?.Invoke());
         _exitBtn?.onClick.AddListener(() => ExitGameClicked?.Invoke());
-    }
-
-    /// <summary>
-    /// 渲染当前存档信息（由 Controller 调用）
-    /// 更新切换存档按钮上的文字，如 "存档 1/3"
-    /// </summary>
-    public void Render(MainMenuModel model)
-    {
-        if (model == null || _switchSaveBtn == null) return;
-
-        var label = _switchSaveBtn.GetComponentInChildren<TextMeshProUGUI>();
-        if (label != null)
-            label.text = $"存档 {model.CurrentSlotIndex + 1}/{model.MaxSaveSlots}";
     }
 
     private void OnDestroy()

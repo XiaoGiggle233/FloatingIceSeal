@@ -18,6 +18,7 @@ public enum ViewType
     PauseView,          // 暂停菜单界面
     SettingsView,       // 设置面板界面
     GameOverView,       // 结算界面
+    SwitchSaveView,     // 切换存档界面
 
     // ===== 功能模块 =====
     InventoryView,      // 背包界面

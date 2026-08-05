@@ -7,7 +7,7 @@ using UnityEngine;
 public static class SaveManager
 {
     private const string SAVE_KEY_PREFIX = "SaveSlot_";
-    public const int MaxSaveSlots = 3;
+    public const int MaxSaveSlots = 4;
 
     /// <summary>保存存档到指定槽位</summary>
     public static void Save(int slotIndex, SaveData data)
@@ -50,6 +50,27 @@ public static class SaveManager
         if (slotIndex < 0 || slotIndex >= MaxSaveSlots) return;
         PlayerPrefs.DeleteKey(SAVE_KEY_PREFIX + slotIndex);
         PlayerPrefs.Save();
+    }
+
+    /// <summary>复制指定槽位的存档到第一个空槽位，返回目标槽位索引；无空槽返回 -1</summary>
+    public static int Copy(int sourceSlotIndex)
+    {
+        if (sourceSlotIndex < 0 || sourceSlotIndex >= MaxSaveSlots) return -1;
+
+        SaveData data = Load(sourceSlotIndex);
+        if (data == null || data.isEmpty) return -1;
+
+        for (int i = 0; i < MaxSaveSlots; i++)
+        {
+            if (i == sourceSlotIndex) continue;
+            SaveData target = Load(i);
+            if (target == null || target.isEmpty)
+            {
+                Save(i, data);
+                return i;
+            }
+        }
+        return -1;
     }
 
     /// <summary>更新指定槽位的当前关卡</summary>

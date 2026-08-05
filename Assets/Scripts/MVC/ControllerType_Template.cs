@@ -17,6 +17,7 @@ public enum ControllerType
     Pause,          // 暂停菜单
     Settings,       // 设置面板
     GameOver,       // 结算界面
+    SwitchSave,     // 切换存档
 
     // ===== 功能模块 =====
     Inventory,      // 背包

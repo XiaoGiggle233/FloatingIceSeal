@@ -502,8 +502,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u91CD\u7F6E\u5173\u5361"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 3dd4a529e8324824f9767bf0783c453f, type: 2}
-  m_sharedMaterial: {fileID: 8266759542445022995, guid: 3dd4a529e8324824f9767bf0783c453f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 585de53f6775a534798aab7afd89cbdc, type: 2}
+  m_sharedMaterial: {fileID: 1248645545673564898, guid: 585de53f6775a534798aab7afd89cbdc, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

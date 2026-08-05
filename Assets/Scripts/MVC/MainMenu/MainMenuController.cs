@@ -29,9 +29,6 @@ public class MainMenuController : BaseController
             _view.SettingsClicked += OnSettings;
             _view.CreditsClicked += OnCredits;
             _view.ExitGameClicked += OnExitGame;
-
-            // View 加载后立即渲染当前存档信息
-            _view.Render(_menuModel);
         }
     }
 
@@ -73,15 +70,8 @@ public class MainMenuController : BaseController
 
     private void OnSwitchSave()
     {
-        _menuModel.CurrentSlotIndex = (_menuModel.CurrentSlotIndex + 1) % SaveManager.MaxSaveSlots;
-        LoadCurrentSlotInfo();
-        _view?.Render(_menuModel);
-
-        SaveData save = SaveManager.Load(_menuModel.CurrentSlotIndex);
-        if (save != null && !save.isEmpty)
-            Debug.Log($"切换到存档 {_menuModel.CurrentSlotIndex + 1}，当前关卡: {save.currentLevel}");
-        else
-            Debug.Log($"切换到存档 {_menuModel.CurrentSlotIndex + 1}（空）");
+        // 打开切换存档面板
+        MVCManager.ControllerManager.ApplyFunc(ControllerType.SwitchSave, "OpenPanel");
     }
 
     private void OnSettings()
