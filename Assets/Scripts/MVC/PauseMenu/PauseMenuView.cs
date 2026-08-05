@@ -24,10 +24,10 @@ public class PauseMenuView : BaseView
         base.OnAwake();
 
         _backButton = Find<Button>("SettingsBackButton");
-        _scrollRect = Find<ScrollRect>("Scroll View");
-        _scrollContent = Find<RectTransform>("Scroll View/Viewport/Content");
-        _scrollViewport = Find<RectTransform>("Scroll View/Viewport");
-        _scrollbarVertical = Find<Scrollbar>("Scroll View/Scrollbar Vertical");
+        _scrollRect = Find<ScrollRect>("Panel/Pannel/Scroll View");
+        _scrollContent = Find<RectTransform>("Panel/Pannel/Scroll View/Viewport/Content");
+        _scrollViewport = Find<RectTransform>("Panel/Pannel/Scroll View/Viewport");
+        _scrollbarVertical = Find<Scrollbar>("Panel/Pannel/Scroll View/Scrollbar Vertical");
 
         _backButton?.onClick.AddListener(() => BackClicked?.Invoke());
 
