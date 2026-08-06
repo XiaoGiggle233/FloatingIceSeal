@@ -96,8 +96,8 @@ public class SaveSlotButton : MonoBehaviour,
     private Sprite ResolveSprite(Sprite normal, Sprite hover, Sprite pressed, Sprite selected)
     {
         if (_pressed && pressed != null) return pressed;
-        if (_hovered && hover != null) return hover;
         if (_selected && selected != null) return selected;
+        if (_hovered && hover != null) return hover;
         return normal;
     }
 }
