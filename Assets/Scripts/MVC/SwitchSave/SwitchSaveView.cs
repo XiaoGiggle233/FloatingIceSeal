@@ -23,6 +23,7 @@ public class SwitchSaveView : BaseView
     public event Action BackClicked;
 
     private Button[] _slotBtns;
+    private SaveSlotButton[] _slotBtnsState;
     private Button _copyBtn;
     private Button _deleteBtn;
     private Button _backBtn;
@@ -32,11 +33,15 @@ public class SwitchSaveView : BaseView
         base.OnAwake();
 
         _slotBtns = new Button[SaveManager.MaxSaveSlots];
+        _slotBtnsState = new SaveSlotButton[SaveManager.MaxSaveSlots];
         for (int i = 0; i < _slotBtns.Length; i++)
         {
             int index = i;
             _slotBtns[i] = Find<Button>($"SaveSlot{i}");
             _slotBtns[i]?.onClick.AddListener(() => SaveSlotClicked?.Invoke(index));
+
+            var go = Find($"SaveSlot{i}");
+            _slotBtnsState[i] = go != null ? go.GetComponent<SaveSlotButton>() : null;
         }
 
         _copyBtn = Find<Button>("CopyBtn");
@@ -62,12 +67,15 @@ public class SwitchSaveView : BaseView
             SaveData save = model.SaveSlots[i];
             bool hasSave = save != null && !save.isEmpty;
             if (label != null)
-                label.text = hasSave ? $"存档 {i + 1}\n关卡 {save.currentLevel}" : $"存档 {i + 1}\n（空）";
+                label.text = hasSave ? $"存档 {i + 1}\n关卡 {save.currentLevel}" : "";
 
-            // 高亮选中的槽位
-            var colors = btn.colors;
-            colors.normalColor = i == model.SelectedSlotIndex ? new Color(0.6f, 0.85f, 1f) : Color.white;
-            btn.colors = colors;
+            // 驱动 SaveSlotButton 切换 sprite
+            var state = _slotBtnsState[i];
+            if (state != null)
+            {
+                state.SetHasSave(hasSave);
+                state.SetSelected(i == model.SelectedSlotIndex);
+            }
         }
     }
 
