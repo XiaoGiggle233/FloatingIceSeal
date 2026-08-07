@@ -1,0 +1,111 @@
+---
+name: level-mechanisms
+description: '关卡机制（TileMap 类场景物件）的实现方法与扩展接入指南——墙、浮冰、刺、水草、铁丝网、水体等。Use when: 开发/修改关卡机制物件、新增一种机制、理解现有机制的脚本划分与存放位置、为机制接入碰撞/触发器逻辑、添加机制专用 Layer。触发词：关卡机制、墙、浮冰、刺、水草、铁丝网、TileMap 机制、WallController、SpikeController、FloatingIceController、SeagrassController、SteelWireMeshController、WatterController、CompositeCollider2D、TilemapCollider2D、机制脚本、扩展机制。'
+argument-hint: '[机制名或需求描述]'
+---
+
+# 关卡机制（TileMap 类）实现方法与扩展指南
+
+本 skill 总结项目中所有**基于 TileMap 的关卡机制**（墙、浮冰、刺、水草、铁丝网、水体）的统一实现模式，以及如何新增一种机制（Hooks 扩展点）。
+
+## 通用架构模式
+
+所有机制遵循同一套模式：
+
+| 层面 | 位置 | 说明 |
+|------|------|------|
+| 控制器脚本 | `Assets/Scripts/SenceObjects/TileMap/<机制名>/` | 每个机制一个文件夹，内含 Controller 脚本 |
+| Prefab | `Assets/Prefabs/TileMap/<机制名>.prefab` | 挂载 TileMap 组件族 |
+| 组件组成 | Tilemap + TilemapRenderer + TilemapCollider2D + Rigidbody2D + CompositeCollider2D | 机制物件标准组件组合 |
+| 注册方式 | Controller 在 `OnEnable`/`OnDisable` 注册/移除 InformationPool | 供其他系统查询引用 |
+| 交互方式 | 角色侧通过 `GameEvents` 碰撞事件 + `InformationPool` 查询机制引用 | 机制脚本本身不做交互逻辑 |
+
+> 机制脚本**只负责注册**（标记自身存在），实际交互逻辑全部写在角色控制器/监听脚本中，通过 InformationPool 取引用、通过 GameEvents 收事件。
+
+## 各机制实现明细
+
+### 墙（Wall）—— 物理阻挡 + 陆地判定
+
+- 脚本：`SenceObjects/TileMap/Wall/WallController.cs`，仅 `InformationPool.Set("Wall", this)`
+- Prefab 组件：`TilemapCollider2D`(UsedByComposite=1) + `CompositeCollider2D`(GeometryType=**Polygons**=1) + Rigidbody2D
+- 交互：`SealEnvironmentStateMachineController` 通过 `GetComponent<WallController>()` 识别碰撞对象是否为墙，统计**垂直接触数**（`IsVerticalContact` 判定法线 |y|>|x|）决定 `EnvironmentState.OnLand`
+- 关键点：墙同时承担「地面」职责，角色的陆地/空中状态切换依赖它
+
+### 浮冰（FloatingIce）—— 可移动平台 + 自动回归
+
+- 脚本（两个）：
+  - `FloatingIceController.cs`：注册到 `"FloatingIceList"`（列表）+ 兼容单引用 `"FloatingIce"`（列表模式写法见「扩展模式」）
+  - `FloatingIceMovingController.cs`：`[RequireComponent(typeof(Rigidbody2D))]`，在 `FixedUpdate` 中让 TileMap 从偏移位置以不同速度回归初始位置
+- Prefab：注意存放于 `Assets/Prefabs/FlowingIce/FlowtingIce.prefab`（拼写为 FlowtingIce），组件含 TilemapCollider2D(UsedByComposite=1) + CompositeCollider2D(GeometryType=Polygons)
+- 参数：`waterReturnSpeed`（水中回归速度）/ `airReturnSpeed`（空中回归速度）/ `waterCheckDistance` / `snapDistance`（归位阈值）
+- 关键点：用 `WatterUtils.HasWaterBelow()` 判断自身是否在水中，从而选择回归速度
+
+### 刺（Spike）—— 冲刺碰撞伤害
+
+- 脚本：`SenceObjects/TileMap/Spike/SpikeController.cs`，仅 `InformationPool.Set("Spike", this)`
+- Prefab 组件：`TilemapCollider2D`(UsedByComposite=1) + `CompositeCollider2D`(GeometryType=**Outlines**=0) ← 与其他机制的 Polygons 不同
+- 交互（角色侧）：
+  - `SealMoveController.OnCollisionEvent`（监听 `COLLISION_EVENT_ON_ENTER`）：冲刺中碰到刺 → 停止冲刺 `EndDash()` + 击退反弹 `ApplyHurtBounce(normal)` + 进入无敌 `EnterInvincibility()`；通过 `IsSpike()` 用信息池比对目标对象
+  - `BubbleControllerBase`：气泡碰到刺会破裂
+- 关键点：刺的伤害只在**冲刺状态**下触发；普通行走碰到刺暂无伤害逻辑
+
+### 水草（Seagrass）—— 物理阻挡（预留扩展）
+
+- 脚本：`SenceObjects/TileMap/Seagrass/SeagrassController.cs`，仅 `InformationPool.Set("Seagrass", this)`
+- Prefab 组件：`TilemapCollider2D`(UsedByComposite=**0**) + `CompositeCollider2D`(GeometryType=Polygons=1)
+- 图层：`Seagrass`（自定义 Layer，index 9）
+- 现状：仅物理碰撞阻挡 + 信息池注册，**尚无特殊交互逻辑**，为后续功能预留接入点
+
+### 铁丝网（SteelWireMesh）—— 物理阻挡（预留扩展）
+
+- 脚本：`SenceObjects/TileMap/SteelWireMesh/SteelWireMeshController.cs`，仅 `InformationPool.Set("SteelWireMesh", this)`
+- Prefab 组件：同水草（TilemapCollider2D UsedByComposite=0 + CompositeCollider2D Polygons）
+- 图层：`SteelWireMesh`（自定义 Layer，index 8）
+- 现状：仅物理碰撞阻挡 + 信息池注册，尚无特殊交互逻辑
+
+### 水体（Watter）—— 环境判定 + 流动推力
+
+- 脚本（三个）：`WatterController.cs`（注册 `"WatterList"` 列表 + 兼容单引用）+ `FlowingWatter.cs`（Odin 序列化，`FlowDirection` + `forceAmount`，`OnTriggerStay2D` 给刚体加力）+ `WatterUtils.cs`（静态工具类）
+- Prefab 组件：`TilemapCollider2D`(IsTrigger=1, UsedByComposite=1) + `CompositeCollider2D`(IsTrigger=1, GeometryType=Polygons=1)
+- 图层：`Watter`（自定义 Layer，index 10；**注意不是内置的 Water 层**）
+- 交互：
+  - 环境状态机：`CheckIsInWater()` 遍历 `WatterList`，用 `Collider2D.Distance` 判定与 `CompositeCollider2D` 是否重叠
+  - 氧气控制器：取重叠水体后用 `WatterUtils.GetWaterSurfaceY()` 计算露出比例，决定氧气回复/消耗
+  - 通用水体检测：统一用 `WatterUtils`（`HasWaterBelow`/`GetWaterSurfaceY`/`RaycastToWater`），详见 `water-system` skill
+- ⚠️ 关键坑：判定与复合碰撞体的重叠统一用 `Collider2D.Distance`（`isOverlapped`），不要用 `OverlapPoint`——后者依赖 GeometryType 且对 Outlines 边缘碰撞体不可靠
+
+## Hooks：新增一种机制的接入点
+
+按以下步骤为项目添加新机制：
+
+1. **创建脚本目录**：`Assets/Scripts/SenceObjects/TileMap/<机制名>/<机制名>Controller.cs`
+2. **编写注册脚本**（最简形式，参考 WallController）：
+   ```csharp
+   public class NewMechanismController : MonoBehaviour
+   {
+       private void OnEnable()  => InformationPool.Set("NewMechanism", this);
+       private void OnDisable() => InformationPool.Remove("NewMechanism");
+   }
+   ```
+   - 单实例机制：直接 `Set`/`Remove` 字符串键
+   - 多实例机制：参考 `FloatingIceController`/`WatterController` 的**列表模式**（`TryGet` 列表 → 追加自身；`OnDisable` 移除自身，空列表则删键；单引用字段用 `ReferenceEquals` 保护避免误删）
+3. **创建 Prefab**：`Assets/Prefabs/TileMap/<机制名>.prefab`，挂载标准组件族：
+   - `Tilemap` + `TilemapRenderer`（绘制关卡地形）
+   - `TilemapCollider2D`（碰撞体）
+   - `Rigidbody2D` + `CompositeCollider2D`（合并碰撞体，静态机制保持 `bodyType=Static`，动态机制如浮冰设 Dynamic/Kinematic）
+   - 触发类机制：`IsTrigger=1`（如水体、触发器）；阻挡类：`IsTrigger=0`
+   - 项目惯例：普通地形机制用 `GeometryType=Polygons`（墙/水草/铁丝网/水体/浮冰均如此），刺用的是 `Outlines`
+4. **需要专属图层**：在 `ProjectSettings/TagManager.asset` 的 `layers` 中添加，然后用 `LayerMask.GetMask("<Layer>")` 引用
+5. **接入交互逻辑**（任选其一或组合）：
+   - 监听碰撞事件：`GameEvents.Listen(EventType.COLLISION_EVENT_ON_ENTER, ...)` 中比对 `CollisionEventArgs.Source/Target` 与信息池中的机制引用（参考 `SwitchLevels`、`SealMoveController`、`FlowingWatter`）
+   - 使用 Trigger 回调：`OnTriggerEnter2D`/`OnTriggerStay2D` 直接处理（参考 `FlowingWatter.OnTriggerStay2D` 加力、`CameraLockTriggerController` 锁镜头）
+   - 被角色状态机感知：在对应角色控制器中 `GetComponent<XxxController>()` 或信息池查询（参考环境状态机对 `WallController`、移动控制器对 `"Spike"` 的用法）
+6. **若机制影响角色状态**（氧气/环境/生命）：在 `SealOxygenController`/`SealEnvironmentStateMachineController`/`SealMoveController` 的对应判断分支中加入对机制的识别
+
+## 参考实现
+
+- 注册脚本：`WallController`、`SpikeController`、`SeagrassController`、`SteelWireMeshController`
+- 多实例列表注册：`FloatingIceController`、`WatterController`
+- 动态机制：`FloatingIceMovingController`
+- 触发交互：`FlowingWatter`、`CameraLockTriggerController`、`CameraOverviewTriggerController`、`SwitchLevels`
+- 水体检测工具：`WatterUtils`（详见 `water-system` skill）
