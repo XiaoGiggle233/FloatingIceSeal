@@ -40,6 +40,14 @@ argument-hint: '[机制名或需求描述]'
 - 参数：`waterReturnSpeed`（水中回归速度）/ `airReturnSpeed`（空中回归速度）/ `waterCheckDistance` / `snapDistance`（归位阈值）
 - 关键点：用 `WatterUtils.HasWaterBelow()` 判断自身是否在水中，从而选择回归速度
 
+### 木箱（WoodBox）—— 浮力上浮 + 固定水面
+
+- 脚本（两个）：`SenceObjects/TileMap/WoodBox/WoodBoxController.cs`（注册 `"WoodBoxList"` 列表 + 兼容单引用 `"WoodBox"`）+ `WoodBoxBuoyancyController.cs`（浮力行为）
+- Prefab：`Assets/Prefabs/TileMap/WoodBox.prefab`，组件含 TilemapCollider2D(UsedByComposite=1) + CompositeCollider2D(GeometryType=Polygons) + Rigidbody2D(**Dynamic**，受重力，靠浮力对抗)
+- 参数（`WoodBoxBuoyancyController`，Inspector 可调）：`buoyancyForce`（浮力大小）/ `mass`（物体质量，写入 Rigidbody2D）/ `linearDrag`（移动阻力，写入 Rigidbody2D.drag）/ `snapDistance`（归位阈值）
+- 逻辑：`Start` 时基于 tile 包围盒（`tilemap.localBounds`）缓存中心 X 与底部 Y 相对 transform 的偏移；`FixedUpdate` 中用 tile 中心 X 调 `WatterUtils.GetWaterSurfaceY()` 取水面高度，目标 Y = 水面 − tile 底部偏移（**tile 底部贴水面**）；到达目标（阈值内）则固定（`MovePosition` + 速度清零）；在水下则 `AddForce(Vector2.up * buoyancyForce)` 上浮
+- 关键点：目标基于 **tile 位置**而非 Tilemap 物体 transform 计算；固定位置是**水面**而非世界坐标，水面变化时木箱跟随；被压入水下会自动浮回
+
 ### 刺（Spike）—— 冲刺碰撞伤害
 
 - 脚本：`SenceObjects/TileMap/Spike/SpikeController.cs`，仅 `InformationPool.Set("Spike", this)`
@@ -105,7 +113,7 @@ argument-hint: '[机制名或需求描述]'
 ## 参考实现
 
 - 注册脚本：`WallController`、`SpikeController`、`SeagrassController`、`SteelWireMeshController`
-- 多实例列表注册：`FloatingIceController`、`WatterController`
-- 动态机制：`FloatingIceMovingController`
+- 多实例列表注册：`FloatingIceController`、`WatterController`、`WoodBoxController`
+- 动态机制：`FloatingIceMovingController`、`WoodBoxBuoyancyController`（浮力）
 - 触发交互：`FlowingWatter`、`CameraLockTriggerController`、`CameraOverviewTriggerController`、`SwitchLevels`
 - 水体检测工具：`WatterUtils`（详见 `water-system` skill）
