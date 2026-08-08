@@ -22,6 +22,43 @@ argument-hint: '[机制名或需求描述]'
 
 > 机制脚本**只负责注册**（标记自身存在），实际交互逻辑全部写在角色控制器/监听脚本中，通过 InformationPool 取引用、通过 GameEvents 收事件。
 
+## 可摧毁接口 IDestroyable
+
+[IDestroyable.cs](../../../Assets/Scripts/Interfaces/IDestroyable.cs)（位于 `Assets/Scripts/Interfaces/`）是"可被爆炸摧毁"的契约接口：
+
+```csharp
+public interface IDestroyable
+{
+    /// <summary>被爆炸摧毁（按爆炸中心与半径破坏自身）</summary>
+    void DestroyByExplosion(Vector2 explosionCenter, float explosionRadius);
+}
+```
+
+- 已实现该接口的机制：刺（`SpikeController`）、水草（`SeagrassController`）、铁丝网（`SteelWireMeshController`）、木箱（`WoodBoxController`）、浮冰（`FloatingIceController`）
+- 这些均为 Tilemap 机制，`DestroyByExplosion` 统一调用 [TilemapDestroyUtils.cs](../../../Assets/Scripts/SenceObjects/TileMap/TilemapDestroyUtils.cs) 的 `DestroyTilesInRadius(tilemap, center, radius)`——**只移除爆炸中心半径范围内的瓦片，保留范围外瓦片，不销毁整个 GameObject**（CompositeCollider2D 会随瓦片移除自动重建）
+- 爆炸系统（如 `MineExplosionController`）对爆炸范围内命中物体检测 `IDestroyable` 并调用该方法；没有实现该接口的物体（如墙 `WallController`）不会被爆炸破坏
+
+## 关卡重置系统 ILevelResetable / LevelResetSystem
+
+角色死亡或重置关卡时，需把关卡恢复到初始状态（瓦片、动态对象位置、被销毁的对象重建）。由 [ILevelResetable.cs](../../../Assets/Scripts/Interfaces/ILevelResetable.cs) + [LevelResetSystem.cs](../../../Assets/Scripts/GameProcess/LevelResetSystem/LevelResetSystem.cs) 实现：
+
+```csharp
+public interface ILevelResetable
+{
+    /// <summary>关卡状态恢复完成后回调（用于重算内部缓存等）</summary>
+    void OnLevelRestore();
+}
+```
+
+- **`LevelResetSystem`**（挂在场景 `Managers` 下）：
+  - `CaptureState()`：记录关卡初始状态——场景所有 Tilemap 的瓦片快照 + 所有 `ILevelResetable` 对象的位置/旋转（按名称匹配 `resetablePrefabs` 数组记录重建用的 prefab）
+  - **自动记录**：监听 `PLAYER_EVENT_ON_SPAWN`（角色出生）→ 延迟一帧执行 `CaptureState()`（仅首次，重生不重记录；`CaptureState` 仍是公开方法可手动调用）
+  - 监听 `UI_EVENT_ON_RESET_LEVEL` + `PLAYER_EVENT_ON_DEATH` → `RestoreState()`：**先重建/恢复对象，再铺瓦片**。瓦片快照**按 Tilemap 名称匹配**恢复（支持对象销毁重建后引用不失效）；动态对象快照**总是从 prefab 重建**（先按名称清理所有同名旧对象含 inactive，再 `Instantiate` 到记录位置并恢复父级），无 prefab 时退回恢复位置；最后调用所有 `ILevelResetable.OnLevelRestore()`
+  - ⚠️ 必须"总是重建"的原因：水雷 `Explode()` 同步发布死亡事件，此时 `Destroy` 尚在排队，若只"存在则恢复位置"，水雷随后销毁却不会重建；且多次死亡后旧对象残留同名，需按名称全量清理
+  - `resetablePrefabs`：Inspector 配置可重建对象 prefab（水雷 `Assets/Prefabs/Mine.prefab`、木箱 `Assets/Prefabs/TileMap/WoodBox.prefab`、浮冰 `Assets/Prefabs/FlowingIce/FloatingIce.prefab`）
+- **已实现 `ILevelResetable`**：`MineController`、`WoodBoxController`（`OnLevelRestore` 重算浮力偏移）、`FloatingIceController`
+- 使用注意：初始状态在角色首次出生（`PLAYER_EVENT_ON_SPAWN`）后延迟一帧自动记录；`CaptureState()` 也可手动调用
+
 ## 各机制实现明细
 
 ### 墙（Wall）—— 物理阻挡 + 陆地判定
@@ -45,8 +82,23 @@ argument-hint: '[机制名或需求描述]'
 - 脚本（两个）：`SenceObjects/TileMap/WoodBox/WoodBoxController.cs`（注册 `"WoodBoxList"` 列表 + 兼容单引用 `"WoodBox"`）+ `WoodBoxBuoyancyController.cs`（浮力行为）
 - Prefab：`Assets/Prefabs/TileMap/WoodBox.prefab`，组件含 TilemapCollider2D(UsedByComposite=1) + CompositeCollider2D(GeometryType=Polygons) + Rigidbody2D(**Dynamic**，受重力，靠浮力对抗)
 - 参数（`WoodBoxBuoyancyController`，Inspector 可调）：`buoyancyForce`（浮力大小）/ `mass`（物体质量，写入 Rigidbody2D）/ `linearDrag`（移动阻力，写入 Rigidbody2D.drag）/ `snapDistance`（归位阈值）
-- 逻辑：`Start` 时基于 tile 包围盒（`tilemap.localBounds`）缓存中心 X 与底部 Y 相对 transform 的偏移；`FixedUpdate` 中用 tile 中心 X 调 `WatterUtils.GetWaterSurfaceY()` 取水面高度，目标 Y = 水面 − tile 底部偏移（**tile 底部贴水面**）；到达目标（阈值内）则固定（`MovePosition` + 速度清零）；在水下则 `AddForce(Vector2.up * buoyancyForce)` 上浮
-- 关键点：目标基于 **tile 位置**而非 Tilemap 物体 transform 计算；固定位置是**水面**而非世界坐标，水面变化时木箱跟随；被压入水下会自动浮回
+- 逻辑：`Start` 时基于非空 tile 遍历缓存中心 X 与底部 Y 相对 transform 的偏移（`RecacheTileGeometry`，内含 tilemap 懒获取）；`FixedUpdate` 中用 tile 中心 X 调 `WatterUtils.GetWaterSurfaceY()` 取水面高度，目标 Y = 水面 − tile 底部偏移（**tile 底部贴水面**）；到达目标（阈值内）则固定（`MovePosition` + 速度清零）；在水下则 `AddForce(Vector2.up * buoyancyForce)` 上浮
+- 关键点：目标基于 **tile 位置**而非 Tilemap 物体 transform 计算；固定位置是**水面**而非世界坐标，水面变化时木箱跟随；被压入水下会自动浮回；**爆炸破坏瓦片后** `WoodBoxController.DestroyByExplosion` 会调用 `RecacheTileGeometry()` 重新计算偏移（避免剩余瓦片悬空），瓦片全部被炸毁则销毁木箱
+
+### 水雷（Mine）—— 非 TileMap 的 2D 物体机制
+
+> 水雷是**不使用 Tilemap** 的机制示例：普通 GameObject + SpriteRenderer + CircleCollider2D + Rigidbody2D。
+
+- 脚本（三个）：`SenceObjects/Mine/MineController.cs`（注册 `"MineList"` 列表 + 兼容单引用 `"Mine"`）+ `MineMovingController.cs`（移动逻辑）+ `MineExplosionController.cs`（爆炸机制）
+- Prefab：`Assets/Prefabs/Mine.prefab`，组件：SpriteRenderer(水雷精灵) + CircleCollider2D(**IsTrigger=1**) + Rigidbody2D(Dynamic, gravityScale=0, freezeRotation) + 三个脚本
+- 参数（`MineMovingController`）：`returnSpeed`（回归速度）/ `bubblePushForce`（气泡推力）/ `snapDistance`（归位阈值）
+- 参数（`MineExplosionController`）：`detectRadius`（检测范围）/ `explosionRadius`（爆炸范围）
+- 移动逻辑：与浮冰相同的**回归**——`Start` 记录初始位置，`FixedUpdate` 中 `MovePosition` 向初始位置移动（`returnSpeed` 体现"回归倾向"）；**被气泡推动**——`OnTriggerEnter2D`/`OnTriggerStay2D` 检测 `GetComponent<BubbleBase>()`，按水雷→气泡方向 `AddForce(Impulse)` 推开
+- 爆炸逻辑（`MineExplosionController`）：
+  - 触发：`FixedUpdate` 中 `OverlapCircleAll(detectRadius)` 检测范围内有 `Seal`（未来小鱼同样判断）→ `Explode()`；其它水雷 `Explode()` 时连锁引爆检测范围内水雷
+  - 效果：`Explode()` 中对 `OverlapCircleAll(explosionRadius)` 命中对象——有 `Seal`（未来小鱼）则发布 `PLAYER_EVENT_ON_DEATH` 使其死亡；命中 `IDestroyable` 调用 `DestroyByExplosion`；最后销毁自身（`hasExploded` 防止重复/连锁死循环）
+  - 角色死亡复用现有事件链：`SealSpawnAndDeathManager` 监听 `PLAYER_EVENT_ON_DEATH` 重生角色
+- 关键点：气泡是普通 collider + Dynamic 刚体，水雷用 Trigger collider 检测（水雷有 Rigidbody2D 即会收到 Trigger 回调）；气泡碰到水雷不会破裂（`BubbleControllerBase` 只对 Seal/Spike Burst）
 
 ### 刺（Spike）—— 冲刺碰撞伤害
 

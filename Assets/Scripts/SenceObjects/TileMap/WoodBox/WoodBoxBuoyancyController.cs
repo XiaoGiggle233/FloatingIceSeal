@@ -35,12 +35,14 @@ public class WoodBoxBuoyancyController : MonoBehaviour
     {
         rb.mass = mass;
         rb.drag = linearDrag;
-        CacheTileGeometry();
+        RecacheTileGeometry();
     }
 
-    /// <summary>遍历非空 tile 计算包围盒，缓存中心 X 与底部 Y 相对 transform 的偏移</summary>
-    private void CacheTileGeometry()
+    /// <summary>遍历非空 tile 计算包围盒，缓存中心 X 与底部 Y 相对 transform 的偏移（爆炸破坏瓦片后需重新调用）</summary>
+    public void RecacheTileGeometry()
     {
+        if (tilemap == null)
+            tilemap = GetComponent<Tilemap>();
         if (tilemap == null) return;
 
         BoundsInt bounds = tilemap.cellBounds;
