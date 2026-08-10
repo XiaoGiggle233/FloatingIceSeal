@@ -121,7 +121,7 @@ public class SealBlowBubbleController : MonoBehaviour
         }
 
         chargedOxygen += actual;
-        currentBubble.oxygen = Mathf.RoundToInt(chargedOxygen);
+        currentBubble.oxygen = chargedOxygen;
         Vector3 spawnPos = GetSpawnPosition();
         InformationPool.Set("BlowBubbleSpawnPos", spawnPos);
         currentBubble.transform.position = spawnPos;
@@ -133,7 +133,7 @@ public class SealBlowBubbleController : MonoBehaviour
 
         if (currentBubble != null)
         {
-            currentBubble.oxygen = Mathf.RoundToInt(chargedOxygen);
+            currentBubble.oxygen = chargedOxygen;
 
             GameEvents.Publish(EventType.PLAYER_EVENT_ON_BLOW_BUBBLE,
                 new BubbleBlowEventArgs(this.gameObject, currentBubble.gameObject, chargedOxygen));

@@ -1,23 +1,23 @@
 using UnityEngine;
 
-/// <summary>小气泡控制 —— 继承基类，增加上升距离破裂条件</summary>
+/// <summary>小气泡控制 —— 继承基类，增加上升时间破裂条件</summary>
 public class SmallBubbleController : BubbleControllerBase
 {
     private SmallBubble smallBubble;
-    private float startY;
+    private float startTime;
 
     protected override void Start()
     {
         base.Start();
         smallBubble = bubbleBase as SmallBubble;
-        startY = transform.position.y;
+        startTime = Time.time;
     }
 
     protected override void Update()
     {
         base.Update();
 
-        if (smallBubble != null && transform.position.y - startY > smallBubble.riseBurstDistance)
+        if (smallBubble != null && Time.time - startTime > smallBubble.riseBurstTime)
         {
             bubbleBase.Burst();
         }

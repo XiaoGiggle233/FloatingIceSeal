@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 1949104892708217029}
   - component: {fileID: 1841642483501014247}
   m_Layer: 0
-  m_Name: FlowtingIce
+  m_Name: FloatingIce
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class SmallBubble : BubbleBase
 {
-    [SerializeField] public float riseBurstDistance = 10f;
+    /// <summary>上升存活时间（秒），超过即破裂</summary>
+    [SerializeField] public float riseBurstTime = 5f;
 
     public override void Burst()
     {

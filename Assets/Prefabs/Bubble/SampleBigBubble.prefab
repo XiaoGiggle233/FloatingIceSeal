@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: -8128119179514021180}
   - component: {fileID: 8303405811335513659}
   - component: {fileID: -777539408755825350}
+  - component: {fileID: 962354872013482766}
   m_Layer: 7
   m_Name: SampleBigBubble
   m_TagString: Untagged
@@ -190,3 +191,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d17c588d668d7b7498e03c877730f74a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &962354872013482766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4361703366834461163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd153f8b235a72d499529e35c946413b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sizeParameter: 0.1
+  minVolume: 0.5

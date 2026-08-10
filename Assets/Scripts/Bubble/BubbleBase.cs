@@ -6,7 +6,7 @@ using UnityEngine;
 public abstract class BubbleBase : MonoBehaviour, ICollisionEventPublisher
 {
     //储存的氧气
-    [SerializeField]public int oxygen;
+    [SerializeField]public float oxygen;
     //上浮的速度
     [SerializeField]public float speed;
 

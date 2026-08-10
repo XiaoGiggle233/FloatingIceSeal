@@ -68,25 +68,6 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         PublishTriggerEvent(other.gameObject);
     }
 
-    private void OnCollisionEvent(IGameEvent evt)
-    {
-        var args = evt as CollisionEventArgs;
-        if (args == null) return;
-        // 海豹只响应与气泡的碰撞
-        if (args.Source != this.gameObject && args.Target != this.gameObject) return;
-
-        BubbleBase bubble = null;
-        if (args.Source == this.gameObject)
-            bubble = args.Target.GetComponent<BubbleBase>();
-        else
-            bubble = args.Source.GetComponent<BubbleBase>();
-
-        if (bubble != null)
-        {
-            OxygenController.RecoverOxygen(bubble.oxygen * Model.BubbleOxygenRecoverRatio);
-        }
-    }
-
     #endregion
 
     #region Unity 生命周期
@@ -107,18 +88,6 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         InformationPool.Set("Seal", this);
         GameEvents.Publish(EventType.PLAYER_EVENT_ON_SPAWN,
             new PlayerEventArgs(this.gameObject));
-    }
-
-    private void OnEnable()
-    {
-        GameEvents.Listen(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
-        GameEvents.Listen(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
-    }
-
-    private void OnDisable()
-    {
-        GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
-        GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
     }
 
     private void OnDestroy()

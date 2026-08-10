@@ -5,7 +5,7 @@ description: '水体检测工具集 WatterUtils 的使用指南——向下射�
 
 # 水体检测工具集 WatterUtils
 
-[WatterUtils.cs](../../../Assets/Scripts/SenceObjects/Watter/WatterUtils.cs) 是一个静态工具类，封装了项目中所有向下射线检测水面的通用逻辑。所有需要判断"是否在水下"或"距离水面多远"的脚本都应使用此工具集，而非手写 `Physics2D.Raycast`。
+[WatterUtils.cs](../../../Assets/Scripts/SenceObjects/TileMap/Watter/WatterUtils.cs) 是一个静态工具类，封装了项目中所有向下射线检测水面的通用逻辑。所有需要判断"是否在水下"或"距离水面多远"的脚本都应使用此工具集，而非手写 `Physics2D.Raycast`。
 
 ## 核心 API
 
@@ -15,6 +15,8 @@ description: '水体检测工具集 WatterUtils 的使用指南——向下射�
 | `GetWaterSurfaceY(float x)` | `float` | 获取指定 X 坐标处的水面 Y 值，无水面返回 `float.MinValue` |
 | `RaycastToWater(Vector2 origin, float maxDistance)` | `RaycastHit2D` | 向下发射射线，返回完整命中信息 |
 | `WaterLayerMask` | `LayerMask` | 缓存的水体 LayerMask，等同于 `LayerMask.GetMask("Watter")` |
+
+> ⚠️ **注意**：水面检测依赖 Watter 层射线。**不要把非水体物体（如触发器）放在 Watter 层**，否则会被误判为水面（曾导致木箱浮出水面过高）。
 
 ## 使用场景
 
