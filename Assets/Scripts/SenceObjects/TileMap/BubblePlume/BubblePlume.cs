@@ -18,7 +18,7 @@ public class BubblePlume : MonoBehaviour
     [Title("小气泡参数")]
     [LabelText("氧气量")]
     [SerializeField, MinValue(0)]
-    private int oxygen = 1;
+    private float oxygen = 1f;
 
     [LabelText("上浮速度")]
     [SerializeField, MinValue(0.1f)]

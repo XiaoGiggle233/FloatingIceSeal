@@ -45,7 +45,10 @@ public abstract class BubbleControllerBase : MonoBehaviour
         TryAbsorbBySeal();
     }
 
-    /// <summary>检测海豹是否在吸收范围内（随泡泡大小），命中则回氧并破裂</summary>
+    /// <summary>
+    /// 检测海豹是否在吸收范围内（随泡泡大小）——持续吸收：角色按速率恢复氧气，
+    /// 泡泡按速率减少氧气；泡泡含氧量降到角色最大氧气量的六分之一以下时破裂
+    /// </summary>
     private void TryAbsorbBySeal()
     {
         // 未释放的大泡泡不可被吸收
@@ -58,9 +61,15 @@ public abstract class BubbleControllerBase : MonoBehaviour
         float absorbRadius = GetAbsorbRadius();
         if (absorbRadius <= 0f) return;
 
-        if (Vector2.Distance(transform.position, seal.transform.position) <= absorbRadius)
+        if (Vector2.Distance(transform.position, seal.transform.position) > absorbRadius)
+            return;
+
+        float absorbAmount = seal.Model.BubbleAbsorbRate * Time.deltaTime;
+        seal.OxygenController.RecoverOxygen(absorbAmount);
+        bubbleBase.oxygen -= absorbAmount;
+
+        if (bubbleBase.oxygen <= seal.Model.OxygenMaxValue / 6f)
         {
-            seal.OxygenController.RecoverOxygen(bubbleBase.oxygen * seal.Model.BubbleOxygenRecoverRatio);
             bubbleBase.Burst();
         }
     }

@@ -5,6 +5,7 @@ using UnityEngine;
 /// 公式：大小 = 参数 * 含氧量 + 最小体积
 /// </summary>
 [RequireComponent(typeof(BubbleBase))]
+[DefaultExecutionOrder(100)] // 在泡泡吸收（BubbleControllerBase.Update 减少氧气）之后更新大小，确保同帧跟随
 public class BubbleSizeController : MonoBehaviour
 {
     [Header("大小公式：大小 = 参数 * 含氧量 + 最小体积")]

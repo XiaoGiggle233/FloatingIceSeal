@@ -120,8 +120,8 @@ public class SealModel : MonoBehaviour
     [SerializeField] public float BlowBubbleSpawnOffset = 1.5f;
 
     [FoldoutGroup("吐泡泡")]
-    [LabelText("氧气回复比例"), MinValue(0), SuffixLabel("倍", Overlay = true)]
-    [SerializeField] public float BubbleOxygenRecoverRatio = 1f;
+    [LabelText("吸收速率"), MinValue(0), SuffixLabel("/秒", Overlay = true)]
+    [SerializeField] public float BubbleAbsorbRate = 5f;
 
     #endregion
 
