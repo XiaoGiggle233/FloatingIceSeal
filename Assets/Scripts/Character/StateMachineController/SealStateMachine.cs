@@ -411,3 +411,64 @@ public class DirectionStateMachine
 }
 
 #endregion
+
+#region ========== 6. 气泡保护状态机 (ProtectionStateMachine) ==========
+
+public enum ProtectionState { Unprotected, Protected }
+
+public abstract class ProtectionStateBase : SealState<ProtectionStateMachine>
+{
+    protected ProtectionStateBase(Seal owner, ProtectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class UnprotectedState : ProtectionStateBase
+{
+    public UnprotectedState(Seal owner, ProtectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class ProtectedState : ProtectionStateBase
+{
+    public ProtectedState(Seal owner, ProtectionStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class ProtectionStateMachine
+{
+    private Seal owner;
+
+    public ProtectionState CurrentState { get; private set; }
+    private ProtectionStateBase currentLeafState;
+
+    public UnprotectedState UnprotectedState { get; }
+    public ProtectedState ProtectedState { get; }
+
+    public ProtectionStateMachine(Seal owner)
+    {
+        this.owner = owner;
+        UnprotectedState = new UnprotectedState(owner, this);
+        ProtectedState = new ProtectedState(owner, this);
+    }
+
+    public void Update() => currentLeafState?.Update();
+    public void FixedUpdate() => currentLeafState?.FixedUpdate();
+
+    public void EnterLeafState(ProtectionStateBase newState)
+    {
+        if (currentLeafState == newState) return;
+        currentLeafState?.Exit();
+        currentLeafState = newState;
+        currentLeafState?.Enter();
+    }
+
+    public void SetState(ProtectionState state)
+    {
+        if (CurrentState == state) return;
+        CurrentState = state;
+        GameEvents.Publish(EventType.PLAYER_EVENT_ON_STATE_CHANGE,
+            new GameStateEventArgs(state.ToString()));
+    }
+
+    public bool IsUnprotected() => CurrentState == ProtectionState.Unprotected;
+    public bool IsProtected() => CurrentState == ProtectionState.Protected;
+}
+
+#endregion
