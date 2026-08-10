@@ -41,6 +41,10 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
     [ShowInInspector]
     public DirectionState CurrentDirectionState => DirectionStateMachine?.CurrentState ?? DirectionState.Right;
 
+    public ProtectionStateMachine ProtectionStateMachine { get; private set; }
+    [ShowInInspector]
+    public ProtectionState CurrentProtectionState => ProtectionStateMachine?.CurrentState ?? ProtectionState.Unprotected;
+
     #endregion
 
     #region 碰撞检测
@@ -81,6 +85,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         EnvironmentStateMachine = new EnvironmentStateMachine(this);
         ActionStateMachine = new ActionStateMachine(this);
         DirectionStateMachine = new DirectionStateMachine(this);
+        ProtectionStateMachine = new ProtectionStateMachine(this);
     }
 
     private void Start()
@@ -106,6 +111,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         EnvironmentStateMachine.Update();
         ActionStateMachine.Update();
         DirectionStateMachine.Update();
+        ProtectionStateMachine.Update();
     }
 
     private void FixedUpdate()
@@ -115,6 +121,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         EnvironmentStateMachine.FixedUpdate();
         ActionStateMachine.FixedUpdate();
         DirectionStateMachine.FixedUpdate();
+        ProtectionStateMachine.FixedUpdate();
     }
 
     #endregion
