@@ -28,9 +28,9 @@ public class BubblePlume : MonoBehaviour
     [SerializeField, MinValue(0f)]
     private float outOfWaterBurstDistance = 0.5f;
 
-    [LabelText("上升破裂距离")]
+    [LabelText("上升存活时间")]
     [SerializeField, MinValue(0f)]
-    private float riseBurstDistance = 10f;
+    private float riseBurstTime = 5f;
 
     [Title("信息池")]
     [LabelText("信息池键名")]
@@ -100,7 +100,7 @@ public class BubblePlume : MonoBehaviour
                 bubble.oxygen = oxygen;
                 bubble.speed = speed;
                 bubble.outOfWaterBurstDistance = outOfWaterBurstDistance;
-                bubble.riseBurstDistance = riseBurstDistance;
+                bubble.riseBurstTime = riseBurstTime;
             }
         }
     }
