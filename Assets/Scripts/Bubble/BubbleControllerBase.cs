@@ -39,7 +39,37 @@ public abstract class BubbleControllerBase : MonoBehaviour
         if (!WatterUtils.HasWaterBelow(transform.position, bubbleBase.outOfWaterBurstDistance))
         {
             bubbleBase.Burst();
+            return;
         }
+
+        TryAbsorbBySeal();
+    }
+
+    /// <summary>检测海豹是否在吸收范围内（随泡泡大小），命中则回氧并破裂</summary>
+    private void TryAbsorbBySeal()
+    {
+        // 未释放的大泡泡不可被吸收
+        if (bubbleBase is BigBubble bigBubble && bigBubble.State == BigBubbleState.BeforeRelease)
+            return;
+
+        var seal = InformationPool.Get<Seal>("Seal", null);
+        if (seal == null || !seal.LifeStateMachine.IsAlive()) return;
+
+        float absorbRadius = GetAbsorbRadius();
+        if (absorbRadius <= 0f) return;
+
+        if (Vector2.Distance(transform.position, seal.transform.position) <= absorbRadius)
+        {
+            seal.OxygenController.RecoverOxygen(bubbleBase.oxygen * seal.Model.BubbleOxygenRecoverRatio);
+            bubbleBase.Burst();
+        }
+    }
+
+    /// <summary>吸收范围 = CircleCollider2D 世界半径（随泡泡缩放变化）</summary>
+    private float GetAbsorbRadius()
+    {
+        var circle = GetComponent<CircleCollider2D>();
+        return circle != null ? circle.bounds.extents.x : 0f;
     }
 
     private void OnCollisionEvent(IGameEvent evt)
