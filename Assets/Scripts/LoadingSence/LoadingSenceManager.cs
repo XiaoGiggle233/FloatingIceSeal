@@ -4,13 +4,14 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// 加载场景管理器 —— 异步加载 StartSenece
-/// 加载完成前显示当前加载场景，加载完成后切换到 StartSenece
+/// 加载场景管理器 —— 异步加载目标场景
+/// 目标场景默认取 InformationPool 中的 "TargetSceneName"，未设置时加载 StartSenece
+/// 加载完成前显示当前加载场景，加载完成后切换到目标场景
 /// 挂载到 LoadingSence 场景的 GameObject 上
 /// </summary>
 public class LoadingSenceManager : MonoBehaviour
 {
-    [Header("目标场景")]
+    [Header("目标场景（默认）")]
     [SerializeField] private string targetSceneName = "StartSenece";
 
     [Header("进度显示（可选）")]
@@ -19,6 +20,9 @@ public class LoadingSenceManager : MonoBehaviour
 
     private void Start()
     {
+        if (InformationPool.Has("TargetSceneName"))
+            targetSceneName = InformationPool.Get<string>("TargetSceneName");
+
         StartCoroutine(LoadTargetScene());
     }
 
