@@ -100,6 +100,19 @@ public interface ILevelResetable
   - 角色死亡复用现有事件链：`SealSpawnAndDeathManager` 监听 `PLAYER_EVENT_ON_DEATH` 重生角色
 - 关键点：气泡是普通 collider + Dynamic 刚体，水雷用 Trigger collider 检测（水雷有 Rigidbody2D 即会收到 Trigger 回调）；气泡碰到水雷不会破裂（`BubbleControllerBase` 只对 Seal/Spike Burst）
 
+### 小鱼（SmallFish）—— 非 TileMap 2D 物体 + 追踪玩家大气泡
+
+> 小鱼是**不使用 Tilemap** 的 2D 物体：SpriteRenderer + CircleCollider2D(非 Trigger) + Rigidbody2D(Dynamic, gravityScale=0)。
+
+- 脚本（两个）：`SenceObjects/SmallFish/SmallFishController.cs`（注册 `"SmallFishList"` + `"SmallFish"`、移动/追踪/吸泡核心逻辑）+ `SmallFishSpriteController.cs`（按移动方向 `flipX`，模仿海豹 `SealSpriteController`）
+- Prefab：`Assets/Prefabs/SmallFish.prefab`（SpriteRenderer 素材由用户提供）
+- 参数（`SmallFishController`，全部 Inspector 可调）：`detectRadius`（气泡检测范围）/ `moveSpeed`（正常速度）/ `chaseSpeed`（追踪速度）/ `obstacleCheckDistance` / `initialDirection` / `waitDuration`（发现气泡后等待，默认 0.5s）/ `contactRadius`（接触判定半径）/ `absorbDuration`（吸泡计时）
+- 逻辑：
+  - **漫游**：沿当前方向移动，`RaycastAll` 检测前方非 Trigger 障碍 → 反向
+  - **检测**：`OverlapCircleAll(detectRadius)` 找 `BigBubble` 且 `State == AfterRelease`（玩家释放）→ 停止 → 等待 `waitDuration` → 追踪
+  - **追踪**：向目标气泡移动（`chaseSpeed`）；距离 ≤ `contactRadius` 开始吸泡计时，计时结束 `targetBubble.Burst()`，小鱼恢复漫游
+- 物理规则：小鱼使用 **Fish 层（index 11，TagManager 新增）**，与 **Bubble 层禁用碰撞**（Physics2DSettings 碰撞矩阵清零，与海豹-气泡同方案），与 **Player 层保持碰撞**（小鱼与海豹有物理碰撞）；气泡检测用 `OverlapCircleAll`（不受层碰撞矩阵影响）
+
 ### 刺（Spike）—— 冲刺碰撞伤害
 
 - 脚本：`SenceObjects/TileMap/Spike/SpikeController.cs`，仅 `InformationPool.Set("Spike", this)`

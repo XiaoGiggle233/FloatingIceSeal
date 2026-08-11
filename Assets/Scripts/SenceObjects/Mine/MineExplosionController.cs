@@ -1,15 +1,18 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
-/// 水雷爆炸控制器 —— 检测范围内有 Seal（未来含小鱼）或连锁水雷爆炸时引爆；
+/// 水雷爆炸控制器 —— 检测范围内有 Seal 或小鱼或连锁水雷爆炸时引爆；
 /// 爆炸破坏爆炸范围内可破坏物体（IDestroyable），Tilemap 机制仅移除范围内瓦片
 /// </summary>
 public class MineExplosionController : MonoBehaviour
 {
-    [Header("检测范围")]
+    [FoldoutGroup("爆炸设置", expanded: true)]
+    [LabelText("检测范围"), MinValue(0), SuffixLabel("m", Overlay = true)]
     [SerializeField] private float detectRadius = 1.5f;
 
-    [Header("爆炸范围")]
+    [FoldoutGroup("爆炸设置")]
+    [LabelText("爆炸范围"), MinValue(0), SuffixLabel("m", Overlay = true)]
     [SerializeField] private float explosionRadius = 2f;
 
     private bool hasExploded;
@@ -18,11 +21,11 @@ public class MineExplosionController : MonoBehaviour
     {
         if (hasExploded) return;
 
-        // 检测范围内有 Seal（未来：小鱼也在此判断）→ 爆炸
+        // 检测范围内有 Seal 或小鱼 → 爆炸
         var hits = Physics2D.OverlapCircleAll(transform.position, detectRadius);
         foreach (var hit in hits)
         {
-            if (hit.GetComponent<Seal>() != null)
+            if (hit.GetComponent<Seal>() != null || hit.GetComponent<SmallFishController>() != null)
             {
                 Explode();
                 return;
@@ -48,14 +51,23 @@ public class MineExplosionController : MonoBehaviour
             }
         }
 
-        // 爆炸范围内角色死亡（未来：小鱼也在此判断）+ 破坏可破坏物体
+        // 爆炸范围内角色死亡 + 小鱼死亡 + 破坏可破坏物体
         var expHits = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
         foreach (var hit in expHits)
         {
-            if (hit.GetComponent<Seal>() != null)
+            // 受气泡保护的海豹不会被炸死
+            var seal = hit.GetComponent<Seal>();
+            if (seal != null && !(seal.ProtectionStateMachine?.IsProtected() ?? false))
             {
                 GameEvents.Publish(EventType.PLAYER_EVENT_ON_DEATH,
                     new PlayerEventArgs(hit.gameObject));
+            }
+
+            // 小鱼会被炸死（关卡重置时由 LevelResetSystem 重建）
+            var fish = hit.GetComponent<SmallFishController>();
+            if (fish != null)
+            {
+                Destroy(fish.gameObject);
             }
 
             var destroyable = hit.GetComponent<IDestroyable>();
