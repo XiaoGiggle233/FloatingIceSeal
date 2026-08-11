@@ -165,7 +165,7 @@ MonoBehaviour:
   VelocitySmoothTime: 0.1
   BlowBubbleChargeOxygenRate: 15
   BlowBubbleSpawnOffset: 0.3
-  BubbleOxygenRecoverRatio: 0.9
+  BubbleAbsorbRate: 5
   GravityScale: 2
   InvincibilityDuration: 2
   HurtBounceSpeed: 5
