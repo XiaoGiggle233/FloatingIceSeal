@@ -51,7 +51,7 @@ public class MineExplosionController : MonoBehaviour
             }
         }
 
-        // 爆炸范围内角色死亡（未来：小鱼也在此判断）+ 破坏可破坏物体
+        // 爆炸范围内角色死亡 + 小鱼死亡 + 破坏可破坏物体
         var expHits = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
         foreach (var hit in expHits)
         {
@@ -61,6 +61,13 @@ public class MineExplosionController : MonoBehaviour
             {
                 GameEvents.Publish(EventType.PLAYER_EVENT_ON_DEATH,
                     new PlayerEventArgs(hit.gameObject));
+            }
+
+            // 小鱼会被炸死（关卡重置时由 LevelResetSystem 重建）
+            var fish = hit.GetComponent<SmallFishController>();
+            if (fish != null)
+            {
+                Destroy(fish.gameObject);
             }
 
             var destroyable = hit.GetComponent<IDestroyable>();

@@ -30,6 +30,29 @@ public class SealBlowBubbleController : MonoBehaviour
         oxygenController = GetComponent<SealOxygenController>();
     }
 
+    private void OnEnable()
+    {
+        GameEvents.Listen(EventType.PLAYER_EVENT_ON_DEATH, OnPlayerDeath);
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.Unlisten(EventType.PLAYER_EVENT_ON_DEATH, OnPlayerDeath);
+    }
+
+    /// <summary>角色死亡/关卡重置时销毁未释放的蓄力泡泡</summary>
+    private void OnPlayerDeath(IGameEvent evt)
+    {
+        if (currentBubble != null)
+        {
+            Destroy(currentBubble.gameObject);
+            currentBubble = null;
+            bubbleRb = null;
+            isCharging = false;
+            chargedOxygen = 0f;
+        }
+    }
+
     private void Update()
     {
         TrackLastHorizontalDirection();
