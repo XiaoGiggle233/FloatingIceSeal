@@ -1,20 +1,25 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-/// <summary>大泡泡移动控制 —— 蓄力时固定在生成位置，释放后上浮；被小鱼破坏时上浮速度大幅降低</summary>
+/// <summary>
+/// 大泡泡移动控制 —— 释放后由物理驱动上浮（linearDrag 限制终端速度），
+/// 不再覆盖速度，因此流动水等外力可推动气泡；被小鱼破坏时上浮力大幅降低
+/// </summary>
 public class BigBubbleMoveController : BubbleMoveBase
 {
     [FoldoutGroup("被小鱼破坏", expanded: true)]
-    [LabelText("被破坏时上浮速度倍率"), Range(0, 1), SuffixLabel("倍", Overlay = true)]
+    [LabelText("被破坏时上浮力倍率"), Range(0, 1), SuffixLabel("倍", Overlay = true)]
     [SerializeField] private float breakSpeedFactor = 0.2f;
 
     private bool isReleased;
     private BigBubble bigBubble;
+    private float defaultGravityScale;
 
     protected override void Start()
     {
         base.Start();
         bigBubble = bubbleBase as BigBubble;
+        defaultGravityScale = rb.gravityScale;
 
         if (InformationPool.TryGet("BlowBubbleSpawnPos", out Vector3 spawnPos))
         {
@@ -49,13 +54,12 @@ public class BigBubbleMoveController : BubbleMoveBase
     {
         if (!isReleased) return;
 
-        // 被小鱼破坏时上浮速度大幅降低
-        float limit = (bigBubble != null && bigBubble.IsBeingBroken)
-            ? speed * breakSpeedFactor
-            : speed;
+        // 被小鱼破坏 → 上浮力大幅降低；否则恢复默认（不覆盖速度，水流可推动气泡）
+        float targetGravity = (bigBubble != null && bigBubble.IsBeingBroken)
+            ? defaultGravityScale * breakSpeedFactor
+            : defaultGravityScale;
 
-        Vector2 velocity = rb.velocity;
-        velocity.y = Mathf.Clamp(velocity.y, -limit, limit);
-        rb.velocity = velocity;
+        if (Mathf.Abs(rb.gravityScale - targetGravity) > 0.0001f)
+            rb.gravityScale = targetGravity;
     }
 }
