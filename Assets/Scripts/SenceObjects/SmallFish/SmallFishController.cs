@@ -204,18 +204,19 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
 
     private void MovePatrol()
     {
-        // 离开水面 → 强制向下游回水中
-        if (!IsInWater())
-        {
-            moveDirection = Vector2.down;
-            rb.velocity = moveDirection * moveSpeed;
-            return;
-        }
+        // 巡逻一定是左右移动（进入状态时可能残留上下方向）
+        if (Mathf.Abs(moveDirection.y) > Mathf.Abs(moveDirection.x))
+            RestoreHorizontalMovement();
 
         if (HasObstacleAhead())
             moveDirection = -moveDirection;
 
-        rb.velocity = moveDirection * moveSpeed;
+        // 不在水中 → 抑制向上移动（不允许游出水面；不强制向下，避免抽搐）
+        Vector2 velocity = moveDirection * moveSpeed;
+        if (!IsInWater())
+            velocity.y = Mathf.Min(velocity.y, 0f);
+
+        rb.velocity = velocity;
     }
 
     private void MoveStop()
@@ -226,14 +227,6 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
     private void MoveChase()
     {
         if (targetBubble == null) return;
-
-        // 离开水面 → 强制向下游回水中
-        if (!IsInWater())
-        {
-            moveDirection = Vector2.down;
-            rb.velocity = moveDirection * chaseSpeed;
-            return;
-        }
 
         // 距离过近 → 停止移动，避免抽搐（气泡移动时超出距离再继续追）
         if (Vector2.Distance(transform.position, targetBubble.transform.position) <= stopDistance)
@@ -246,7 +239,13 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
         if (toBubble.sqrMagnitude > 0.01f)
         {
             moveDirection = toBubble.normalized;
-            rb.velocity = moveDirection * chaseSpeed;
+
+            // 不在水中 → 抑制向上移动（不允许游出水面）
+            Vector2 velocity = moveDirection * chaseSpeed;
+            if (!IsInWater())
+                velocity.y = Mathf.Min(velocity.y, 0f);
+
+            rb.velocity = velocity;
         }
     }
 

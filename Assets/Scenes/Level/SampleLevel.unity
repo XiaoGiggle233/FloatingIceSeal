@@ -3087,6 +3087,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SmallFish
       objectReference: {fileID: 0}
+    - target: {fileID: 1234567890123401, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1234567890123402, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.212008
