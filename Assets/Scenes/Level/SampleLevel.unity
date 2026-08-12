@@ -82185,8 +82185,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 593031776}
     m_Modifications:
     - target: {fileID: -9052588044353316386, guid: a89a20a98fd59654796f72ff9745482c, type: 3}
+      propertyPath: forceAmount
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -9052588044353316386, guid: a89a20a98fd59654796f72ff9745482c, type: 3}
       propertyPath: flowDirection
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1060734806101115645, guid: a89a20a98fd59654796f72ff9745482c, type: 3}
       propertyPath: m_Name
