@@ -10,8 +10,13 @@ public class BigBubble : BubbleBase
 
     public BubbleBreakStateMachine BreakStateMachine { get; private set; } = new BubbleBreakStateMachine();
 
+    public BubbleAbsorbStateMachine AbsorbStateMachine { get; private set; } = new BubbleAbsorbStateMachine();
+
     /// <summary>是否正在被小鱼破坏</summary>
     public bool IsBeingBroken => BreakStateMachine.IsBreaking();
+
+    /// <summary>是否正在被海豹吸收</summary>
+    public bool IsBeingAbsorbed => AbsorbStateMachine.IsAbsorbing();
 
     public override void Burst()
     {
@@ -31,5 +36,11 @@ public class BigBubble : BubbleBase
     public void SetBreaking(bool breaking)
     {
         BreakStateMachine.SetState(breaking ? BubbleBreakState.Breaking : BubbleBreakState.NotBreaking);
+    }
+
+    /// <summary>设置是否正在被海豹吸收</summary>
+    public void SetAbsorbing(bool absorbing)
+    {
+        AbsorbStateMachine.SetState(absorbing ? BubbleAbsorbState.Absorbing : BubbleAbsorbState.NotAbsorbing);
     }
 }

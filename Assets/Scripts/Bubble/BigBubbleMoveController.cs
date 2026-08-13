@@ -11,6 +11,10 @@ public class BigBubbleMoveController : BubbleMoveBase
     [LabelText("被破坏时上浮力倍率"), Range(0, 1), SuffixLabel("倍", Overlay = true)]
     [SerializeField] private float breakSpeedFactor = 0.2f;
 
+    [FoldoutGroup("被海豹吸收", expanded: true)]
+    [LabelText("被吸收时上浮力倍率"), Range(0, 1), SuffixLabel("倍", Overlay = true)]
+    [SerializeField] private float absorbSpeedFactor = 0.2f;
+
     private bool isReleased;
     private BigBubble bigBubble;
     private float defaultGravityScale;
@@ -61,10 +65,15 @@ public class BigBubbleMoveController : BubbleMoveBase
     {
         if (!isReleased) return;
 
-        // 被小鱼破坏 → 上浮力大幅降低；否则恢复默认（不覆盖速度，水流可推动气泡）
-        float targetGravity = (bigBubble != null && bigBubble.IsBeingBroken)
-            ? defaultGravityScale * breakSpeedFactor
-            : defaultGravityScale;
+        // 被小鱼破坏 / 被海豹吸收 → 上浮力大幅降低；否则恢复默认（不覆盖速度，水流可推动气泡）
+        float targetGravity = defaultGravityScale;
+        if (bigBubble != null)
+        {
+            if (bigBubble.IsBeingBroken)
+                targetGravity = defaultGravityScale * breakSpeedFactor;
+            else if (bigBubble.IsBeingAbsorbed)
+                targetGravity = defaultGravityScale * absorbSpeedFactor;
+        }
 
         if (Mathf.Abs(rb.gravityScale - targetGravity) > 0.0001f)
             rb.gravityScale = targetGravity;

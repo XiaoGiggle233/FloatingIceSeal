@@ -61,8 +61,13 @@ public abstract class BubbleControllerBase : MonoBehaviour
         float absorbRadius = GetAbsorbRadius();
         if (absorbRadius <= 0f) return;
 
-        if (Vector2.Distance(transform.position, seal.transform.position) > absorbRadius)
-            return;
+        bool inRange = Vector2.Distance(transform.position, seal.transform.position) <= absorbRadius;
+
+        // 通知大气泡是否正在被吸收（进入/退出吸收状态，离开范围自动恢复）
+        if (bubbleBase is BigBubble absorbable)
+            absorbable.SetAbsorbing(inRange);
+
+        if (!inRange) return;
 
         float absorbAmount = seal.Model.BubbleAbsorbRate * Time.deltaTime;
         seal.OxygenController.RecoverOxygen(absorbAmount);
