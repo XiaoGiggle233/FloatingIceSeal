@@ -1,6 +1,23 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
+/// <summary>水雷爆炸参数快照 —— 关卡重置从 prefab 重建后还原场景 Inspector 覆盖值</summary>
+public struct MineExplosionSettings
+{
+    public float detectRadius;
+    public float explosionRadius;
+    public float explosionDelay;
+    public float spawnGracePeriod;
+
+    public MineExplosionSettings(float detectRadius, float explosionRadius, float explosionDelay, float spawnGracePeriod)
+    {
+        this.detectRadius = detectRadius;
+        this.explosionRadius = explosionRadius;
+        this.explosionDelay = explosionDelay;
+        this.spawnGracePeriod = spawnGracePeriod;
+    }
+}
+
 /// <summary>
 /// 水雷爆炸控制器 —— 检测范围内有 Seal 或小鱼或连锁水雷爆炸时引爆；
 /// 爆炸破坏爆炸范围内可破坏物体（IDestroyable），Tilemap 机制仅移除范围内瓦片
@@ -31,6 +48,20 @@ public class MineExplosionController : MonoBehaviour
     private void Awake()
     {
         // 出生保护：防止关卡重置重建后立即检测到重生角色而再次引爆
+        spawnGraceTimer = spawnGracePeriod;
+    }
+
+    /// <summary>捕获当前爆炸参数（关卡重置重建后由 LevelResetSystem 还原）</summary>
+    public MineExplosionSettings CaptureSettings() =>
+        new MineExplosionSettings(detectRadius, explosionRadius, explosionDelay, spawnGracePeriod);
+
+    /// <summary>还原爆炸参数（关卡重置重建后由 LevelResetSystem 调用，同时重新进入出生保护期）</summary>
+    public void RestoreSettings(MineExplosionSettings settings)
+    {
+        detectRadius = settings.detectRadius;
+        explosionRadius = settings.explosionRadius;
+        explosionDelay = settings.explosionDelay;
+        spawnGracePeriod = settings.spawnGracePeriod;
         spawnGraceTimer = spawnGracePeriod;
     }
 
@@ -103,6 +134,11 @@ public class MineExplosionController : MonoBehaviour
             {
                 Destroy(fish.gameObject);
             }
+
+            // 水雷爆炸会炸掉范围内气泡（蓄力中未释放的气泡由 Burst 内部保护）
+            var bubble = hit.GetComponent<BubbleBase>();
+            if (bubble != null)
+                bubble.Burst();
 
             var destroyable = hit.GetComponent<IDestroyable>();
             if (destroyable != null)

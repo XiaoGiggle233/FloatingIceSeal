@@ -219,7 +219,7 @@ public class LevelResetSystem : MonoBehaviour
 
     /// <summary>
     /// 动态对象快照 —— 支持多实例：先统一清理同名旧对象，再逐个从 prefab 重建；
-    /// 无 prefab 时退回恢复位置
+    /// 无 prefab 时退回恢复位置；重建时还原 Inspector 覆盖参数（缩放、collider、水雷爆炸参数）
     /// </summary>
     private class ObjectSnapshot
     {
@@ -230,6 +230,9 @@ public class LevelResetSystem : MonoBehaviour
         private readonly Vector3 position;
         private readonly Quaternion rotation;
         private readonly Transform parent;
+        private readonly Vector3 localScale;
+        private readonly Collider2DSnapshot colliderSnapshot;
+        private readonly MineExplosionSettings? explosionSettings;
 
         public GameObject Prefab => prefab;
         public string ObjectName => objectName;
@@ -243,6 +246,13 @@ public class LevelResetSystem : MonoBehaviour
             position = gameObject.transform.position;
             rotation = gameObject.transform.rotation;
             parent = gameObject.transform.parent;
+            localScale = gameObject.transform.localScale;
+
+            var collider = gameObject.GetComponent<Collider2D>();
+            colliderSnapshot = collider != null ? new Collider2DSnapshot(collider) : null;
+
+            var explosion = gameObject.GetComponent<MineExplosionController>();
+            explosionSettings = explosion != null ? explosion.CaptureSettings() : (MineExplosionSettings?)null;
         }
 
         /// <summary>清理所有同名旧对象（含 inactive 与排队销毁的，忽略重名后缀）</summary>
@@ -258,13 +268,30 @@ public class LevelResetSystem : MonoBehaviour
             }
         }
 
-        /// <summary>从 prefab 重建一个实例到记录位置</summary>
+        /// <summary>从 prefab 重建一个实例到记录位置，并还原 Inspector 覆盖参数</summary>
         public void RebuildFromPrefab()
         {
             GameObject instance = Instantiate(prefab, position, rotation);
             instance.name = originalName;
             if (parent != null)
                 instance.transform.SetParent(parent, true);
+
+            // 还原缩放与 collider 参数（prefab 重建会丢失场景覆盖值）
+            instance.transform.localScale = localScale;
+            if (colliderSnapshot != null)
+            {
+                var collider = instance.GetComponent<Collider2D>();
+                if (collider != null)
+                    colliderSnapshot.Restore(collider);
+            }
+
+            // 还原水雷爆炸参数
+            if (explosionSettings.HasValue)
+            {
+                var explosion = instance.GetComponent<MineExplosionController>();
+                if (explosion != null)
+                    explosion.RestoreSettings(explosionSettings.Value);
+            }
         }
 
         /// <summary>无 prefab 时恢复位置（对象已销毁则跳过）</summary>
@@ -280,6 +307,29 @@ public class LevelResetSystem : MonoBehaviour
                 rb.velocity = Vector2.zero;
                 rb.angularVelocity = 0f;
             }
+        }
+    }
+
+    /// <summary>Collider2D 参数快照 —— 记录 Inspector 可覆盖的通用参数与形状参数</summary>
+    private class Collider2DSnapshot
+    {
+        private readonly bool isTrigger;
+        private readonly Vector2 offset;
+        private readonly float radius; // 仅 CircleCollider2D 有效
+
+        public Collider2DSnapshot(Collider2D collider)
+        {
+            isTrigger = collider.isTrigger;
+            offset = collider.offset;
+            radius = collider is CircleCollider2D circle ? circle.radius : 0f;
+        }
+
+        public void Restore(Collider2D collider)
+        {
+            collider.isTrigger = isTrigger;
+            collider.offset = offset;
+            if (collider is CircleCollider2D circle)
+                circle.radius = radius;
         }
     }
 }

@@ -46,21 +46,24 @@ public class MineMovingController : MonoBehaviour
         rb.MovePosition(currentPos + direction * returnSpeed * Time.fixedDeltaTime);
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        PushByBubble(other);
+        PushByBubble(collision);
     }
 
-    private void OnTriggerStay2D(Collider2D other)
+    private void OnCollisionStay2D(Collision2D collision)
     {
-        PushByBubble(other);
+        PushByBubble(collision);
     }
 
-    private void PushByBubble(Collider2D other)
+    private void PushByBubble(Collision2D collision)
     {
-        if (other.GetComponent<BubbleBase>() == null) return;
+        if (collision.gameObject.GetComponent<BubbleBase>() == null) return;
 
-        Vector2 dir = (rb.position - (Vector2)other.transform.position).normalized;
+        // 沿接触法线推开（法线指向水雷）；无接触点则退回中心差方向
+        Vector2 dir = collision.contactCount > 0
+            ? collision.contacts[0].normal
+            : (rb.position - (Vector2)collision.transform.position).normalized;
         if (dir == Vector2.zero) dir = Vector2.up;
         rb.AddForce(dir * bubblePushForce, ForceMode2D.Impulse);
     }

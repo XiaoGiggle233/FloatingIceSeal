@@ -54,6 +54,7 @@ public interface ILevelResetable
   - `CaptureState()`：记录关卡初始状态——场景所有 Tilemap 的瓦片快照 + 所有 `ILevelResetable` 对象的位置/旋转（按名称匹配 `resetablePrefabs` 数组记录重建用的 prefab）
   - **自动记录**：监听 `PLAYER_EVENT_ON_SPAWN`（角色出生）→ 延迟一帧执行 `CaptureState()`（仅首次，重生不重记录；`CaptureState` 仍是公开方法可手动调用）
   - 监听 `UI_EVENT_ON_RESET_LEVEL` + `PLAYER_EVENT_ON_DEATH` → `RestoreState()`：**先重建/恢复对象，再铺瓦片**。瓦片快照**按 Tilemap 名称匹配**恢复（支持对象销毁重建后引用不失效）；动态对象快照**总是从 prefab 重建**（先按名称清理所有同名旧对象含 inactive，再 `Instantiate` 到记录位置并恢复父级），无 prefab 时退回恢复位置；最后调用所有 `ILevelResetable.OnLevelRestore()`
+  - **重建还原 Inspector 覆盖参数**：`ObjectSnapshot` 捕获时记录 `localScale` + `Collider2D` 参数（isTrigger/offset/Circle 的 radius）+ 水雷爆炸参数（`MineExplosionController.CaptureSettings()`）；`RebuildFromPrefab()` 重建后依次写回，避免场景中调过的水雷参数（检测范围/爆炸范围/爆炸延迟/出生保护时间）变回 prefab 初始值
   - ⚠️ 必须"总是重建"的原因：水雷 `Explode()` 同步发布死亡事件，此时 `Destroy` 尚在排队，若只"存在则恢复位置"，水雷随后销毁却不会重建；且多次死亡后旧对象残留同名，需按名称全量清理
   - `resetablePrefabs`：Inspector 配置可重建对象 prefab（水雷 `Assets/Prefabs/Mine.prefab`、木箱 `Assets/Prefabs/TileMap/WoodBox.prefab`、浮冰 `Assets/Prefabs/FlowingIce/FloatingIce.prefab`）
 - **已实现 `ILevelResetable`**：`MineController`、`WoodBoxController`（`OnLevelRestore` 重算浮力偏移）、`FloatingIceController`
@@ -90,15 +91,15 @@ public interface ILevelResetable
 > 水雷是**不使用 Tilemap** 的机制示例：普通 GameObject + SpriteRenderer + CircleCollider2D + Rigidbody2D。
 
 - 脚本（三个）：`SenceObjects/Mine/MineController.cs`（注册 `"MineList"` 列表 + 兼容单引用 `"Mine"`）+ `MineMovingController.cs`（移动逻辑）+ `MineExplosionController.cs`（爆炸机制）
-- Prefab：`Assets/Prefabs/Mine.prefab`，组件：SpriteRenderer(水雷精灵) + CircleCollider2D(**IsTrigger=1**) + Rigidbody2D(Dynamic, gravityScale=0, freezeRotation) + 三个脚本
+- Prefab：`Assets/Prefabs/Mine.prefab`，组件：SpriteRenderer(水雷精灵) + CircleCollider2D(**IsTrigger=0**，非 Trigger，radius 0.12) + Rigidbody2D(Dynamic, gravityScale=0, freezeRotation) + 三个脚本
 - 参数（`MineMovingController`）：`returnSpeed`（回归速度）/ `bubblePushForce`（气泡推力）/ `snapDistance`（归位阈值）
-- 参数（`MineExplosionController`）：`detectRadius`（检测范围）/ `explosionRadius`（爆炸范围）
-- 移动逻辑：与浮冰相同的**回归**——`Start` 记录初始位置，`FixedUpdate` 中 `MovePosition` 向初始位置移动（`returnSpeed` 体现"回归倾向"）；**被气泡推动**——`OnTriggerEnter2D`/`OnTriggerStay2D` 检测 `GetComponent<BubbleBase>()`，按水雷→气泡方向 `AddForce(Impulse)` 推开
+- 参数（`MineExplosionController`）：`detectRadius`（检测范围）/ `explosionRadius`（爆炸范围）/ `explosionDelay`（爆炸延迟）/ `spawnGracePeriod`（出生保护时间）；`CaptureSettings()`/`RestoreSettings()` 供 LevelResetSystem 重建后还原 Inspector 覆盖参数（`RestoreSettings` 同时重置出生保护计时）
+- 移动逻辑：与浮冰相同的**回归**——`Start` 记录初始位置，`FixedUpdate` 中 `MovePosition` 向初始位置移动（`returnSpeed` 体现"回归倾向"）；**被气泡推动**——`MineMovingController` 中 `OnCollisionEnter2D`/`OnCollisionStay2D` 检测 `GetComponent<BubbleBase>()`，沿接触法线方向 `AddForce(Impulse)` 推开（水雷 collider 为非 Trigger，物理碰撞触发回调）
 - 爆炸逻辑（`MineExplosionController`）：
   - 触发：`FixedUpdate` 中 `OverlapCircleAll(detectRadius)` 检测范围内有 `Seal`（未来小鱼同样判断）→ `Explode()`；其它水雷 `Explode()` 时连锁引爆检测范围内水雷
-  - 效果：`Explode()` 中对 `OverlapCircleAll(explosionRadius)` 命中对象——有 `Seal` 且**未受气泡保护**（`seal.ProtectionStateMachine.IsProtected()` 为假）则发布 `PLAYER_EVENT_ON_DEATH` 使其死亡；有 `SmallFishController` 且**未受气泡保护**（`fish.IsProtected()` 为假）则 `Destroy` 小鱼；命中 `IDestroyable` 调用 `DestroyByExplosion`；最后销毁自身（`hasExploded` 防止重复/连锁死循环）
+  - 效果：`Explode()` 中对 `OverlapCircleAll(explosionRadius)` 命中对象——有 `Seal` 且**未受气泡保护**（`seal.ProtectionStateMachine.IsProtected()` 为假）则发布 `PLAYER_EVENT_ON_DEATH` 使其死亡；有 `SmallFishController` 且**未受气泡保护**（`fish.IsProtected()` 为假）则 `Destroy` 小鱼；有 `BubbleBase` 则调用 `Burst()` 炸掉气泡（`BigBubble.Burst()` 对未释放气泡有内部保护）；命中 `IDestroyable` 调用 `DestroyByExplosion`；最后销毁自身（`hasExploded` 防止重复/连锁死循环）
   - 角色死亡复用现有事件链：`SealSpawnAndDeathManager` 监听 `PLAYER_EVENT_ON_DEATH` 重生角色
-- 关键点：气泡是普通 collider + Dynamic 刚体，水雷用 Trigger collider 检测（水雷有 Rigidbody2D 即会收到 Trigger 回调）；气泡碰到水雷不会破裂（`BubbleControllerBase` 只对 Seal/Spike Burst）
+- 关键点：水雷 collider 为非 Trigger（IsTrigger=0），与角色/气泡之间是**物理碰撞**（海豹可推动水雷）；气泡碰到水雷不会破裂（`BubbleControllerBase` 只对 Seal/Spike Burst）
 
 ### 小鱼（SmallFish）—— 非 TileMap 2D 物体 + 追踪玩家大气泡
 
