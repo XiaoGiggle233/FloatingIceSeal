@@ -296,6 +296,8 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
             if (rayHit.collider.gameObject == gameObject) continue;          // 自身
             if (rayHit.collider.gameObject == bubble.gameObject) continue;   // 目标气泡本身
             if (rayHit.collider.GetComponent<Seal>() != null) continue;      // 海豹不算障碍
+            if (rayHit.collider.GetComponent<SeagrassController>() != null) continue;       // 水草不算障碍
+            if (rayHit.collider.GetComponent<SteelWireMeshController>() != null) continue;  // 铁丝网不算障碍
             return false; // 有障碍物阻挡
         }
         return true;
@@ -318,7 +320,7 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
                IsBubbleReachable(targetBubble);
     }
 
-    /// <summary>检测移动方向前方是否有障碍（非触发器、非自身、海豹不算障碍）</summary>
+    /// <summary>检测移动方向前方是否有障碍（非触发器、非自身、海豹/水草不算障碍）</summary>
     private bool HasObstacleAhead()
     {
         var hits = Physics2D.RaycastAll(rb.position, moveDirection, obstacleCheckDistance);
@@ -326,7 +328,8 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
         {
             if (hit.collider == null || hit.collider.isTrigger) continue;
             if (hit.collider.gameObject == gameObject) continue;
-            if (hit.collider.GetComponent<Seal>() != null) continue; // 海豹不算障碍
+            if (hit.collider.GetComponent<Seal>() != null) continue;              // 海豹不算障碍
+            if (hit.collider.GetComponent<SeagrassController>() != null) continue; // 水草不算障碍
             return true;
         }
         return false;

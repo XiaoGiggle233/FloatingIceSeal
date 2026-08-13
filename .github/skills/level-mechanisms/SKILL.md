@@ -110,8 +110,8 @@ public interface ILevelResetable
 - 参数（`SmallFishController`，全部 Inspector 可调）：`detectRadius`（气泡检测范围）/ `moveSpeed`（正常速度）/ `chaseSpeed`（追踪速度）/ `obstacleCheckDistance` / `initialDirection` / `waitDuration`（发现气泡后等待，默认 0.5s）/ `contactRadius`（接触判定半径）/ `absorbDuration`（吸泡计时）
 - 参数（`SmallFishProtectionController`）：`protectedThreshold`（覆盖判定阈值，默认 0.5）/ `sampleGridSize`（采样网格，默认 8）
 - 逻辑：
-  - **漫游**：沿当前方向移动，`RaycastAll` 检测前方非 Trigger 障碍 → 反向
-  - **检测**：`OverlapCircleAll(detectRadius)` 找 `BigBubble` 且 `State == AfterRelease`（玩家释放）→ 停止 → 等待 `waitDuration` → 追踪
+  - **漫游**：沿当前方向移动，`RaycastAll` 检测前方非 Trigger 障碍 → 反向（海豹、水草不算障碍）
+  - **检测**：`OverlapCircleAll(detectRadius)` 找 `BigBubble` 且 `State == AfterRelease`（玩家释放）→ 停止 → 等待 `waitDuration` → 追踪；目标需射线可达（海豹、水草、铁丝网不算障碍）
   - **追踪**：向目标气泡移动（`chaseSpeed`）；距离 ≤ `contactRadius` 开始吸泡计时，计时结束 `targetBubble.Burst()`，小鱼恢复漫游
   - **气泡保护**：`Update` 中采样小鱼碰撞体，统计被 Bubble 层碰撞体覆盖的采样点比例 ≥ `protectedThreshold` 则 `IsProtected=true`；水雷爆炸时受保护的小鱼不会被炸死（与海豹保护判定一致）
 - 物理规则：小鱼使用 **Fish 层（index 11，TagManager 新增）**，与 **Bubble 层禁用碰撞**（Physics2DSettings 碰撞矩阵清零，与海豹-气泡同方案），与 **Player 层保持碰撞**（小鱼与海豹有物理碰撞）；气泡检测用 `OverlapCircleAll`（不受层碰撞矩阵影响）
