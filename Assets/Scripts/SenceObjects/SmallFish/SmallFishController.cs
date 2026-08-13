@@ -49,6 +49,7 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
 
     private Rigidbody2D rb;
     private SmallFishStateMachine fsm;
+    private SmallFishProtectionController protection;
     private Vector2 moveDirection;
     private BigBubble targetBubble;
     private float waitTimer;
@@ -59,6 +60,9 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
 
     /// <summary>当前状态机状态（供 sprite 切换等使用）</summary>
     public SmallFishState CurrentState => fsm.CurrentState;
+
+    /// <summary>是否被气泡保护（气泡覆盖 ≥ 阈值时水雷不会炸死小鱼）</summary>
+    public bool IsProtected() => protection != null && protection.IsProtected;
 
     private void OnEnable()
     {
@@ -96,6 +100,7 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
     {
         rb = GetComponent<Rigidbody2D>();
         fsm = new SmallFishStateMachine();
+        protection = GetComponent<SmallFishProtectionController>();
         moveDirection = initialDirection.normalized;
         if (moveDirection == Vector2.zero) moveDirection = Vector2.right;
     }

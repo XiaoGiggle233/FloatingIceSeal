@@ -97,9 +97,9 @@ public class MineExplosionController : MonoBehaviour
                     new PlayerEventArgs(hit.gameObject));
             }
 
-            // 小鱼会被炸死（关卡重置时由 LevelResetSystem 重建）
+            // 受气泡保护的小鱼不会被炸死，其余小鱼会被炸死（关卡重置时由 LevelResetSystem 重建）
             var fish = hit.GetComponent<SmallFishController>();
-            if (fish != null)
+            if (fish != null && !fish.IsProtected())
             {
                 Destroy(fish.gameObject);
             }
