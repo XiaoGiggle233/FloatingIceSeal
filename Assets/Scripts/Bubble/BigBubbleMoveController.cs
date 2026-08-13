@@ -21,8 +21,15 @@ public class BigBubbleMoveController : BubbleMoveBase
         bigBubble = bubbleBase as BigBubble;
         defaultGravityScale = rb.gravityScale;
 
-        if (InformationPool.TryGet("BlowBubbleSpawnPos", out Vector3 spawnPos))
+        if (rb.simulated)
         {
+            // 场景直接放置（玩家蓄力生成时刚体 simulated=false）→ 初始即释放，进入 AfterRelease
+            isReleased = true;
+            bigBubble?.SetState(BigBubbleState.AfterRelease);
+        }
+        else if (InformationPool.TryGet("BlowBubbleSpawnPos", out Vector3 spawnPos))
+        {
+            // 玩家蓄力生成 → 定位到生成位置，等待释放事件
             transform.position = spawnPos;
         }
     }
