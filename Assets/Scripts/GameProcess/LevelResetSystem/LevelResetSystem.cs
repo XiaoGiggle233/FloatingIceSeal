@@ -16,6 +16,7 @@ public class LevelResetSystem : MonoBehaviour
     private readonly List<ObjectSnapshot> objectSnapshots = new List<ObjectSnapshot>();
     private bool hasCaptured;
     private bool captureScheduled;
+    private int lastRestoreFrame = -1;
 
     private void OnEnable()
     {
@@ -62,13 +63,17 @@ public class LevelResetSystem : MonoBehaviour
         CaptureTilemaps();
         CaptureObjects();
 
-        // 场景未就绪（未抓到任何快照）时不算记录完成，等待下次触发
-        hasCaptured = tilemapSnapshots.Count > 0 || objectSnapshots.Count > 0;
+        // 瓦片与可重置对象都捕获到才算完成（对象快照缺失时允许下次重试，避免水雷等不恢复）
+        hasCaptured = tilemapSnapshots.Count > 0 && objectSnapshots.Count > 0;
     }
 
-    /// <summary>将关卡恢复到记录的初始状态</summary>
+    /// <summary>将关卡恢复到记录的初始状态（同一帧多次触发只恢复一次，避免连锁爆炸反复重建）</summary>
     public void RestoreState()
     {
+        // 同帧内多次事件（如多水雷连锁爆炸）只恢复一次
+        if (lastRestoreFrame == Time.frameCount) return;
+        lastRestoreFrame = Time.frameCount;
+
         if (!hasCaptured) CaptureState();
 
         // 先重建/恢复对象，再铺瓦片（重建的 Tilemap 机制可被重新铺上瓦片）
@@ -88,7 +93,8 @@ public class LevelResetSystem : MonoBehaviour
     private void CaptureObjects()
     {
         objectSnapshots.Clear();
-        foreach (var mb in FindObjectsOfType<MonoBehaviour>())
+        // 含 inactive 对象：水雷爆炸后被禁用/销毁排队时也能被记录，保证恢复时不遗漏
+        foreach (var mb in FindObjectsOfType<MonoBehaviour>(true))
         {
             if (!(mb is ILevelResetable)) continue;
             objectSnapshots.Add(new ObjectSnapshot(mb.gameObject, FindPrefab(mb.gameObject.name)));
@@ -113,8 +119,28 @@ public class LevelResetSystem : MonoBehaviour
 
     private void RestoreObjects()
     {
+        // 1. 有 prefab 的对象：按名称去重，统一清理所有旧实例（避免多实例互相误清）
+        var cleanedNames = new HashSet<string>();
         foreach (var snapshot in objectSnapshots)
-            snapshot.Restore();
+        {
+            if (snapshot.Prefab == null) continue;
+            if (cleanedNames.Add(snapshot.ObjectName))
+                snapshot.CleanupSameName();
+        }
+
+        // 2. 逐个重建：每个快照从 prefab 重建一个实例（多实例各自恢复）
+        foreach (var snapshot in objectSnapshots)
+        {
+            if (snapshot.Prefab != null)
+                snapshot.RebuildFromPrefab();
+        }
+
+        // 3. 无 prefab 的对象：恢复位置
+        foreach (var snapshot in objectSnapshots)
+        {
+            if (snapshot.Prefab == null)
+                snapshot.RestorePosition();
+        }
 
         // 恢复完成后回调（重算内部缓存）
         foreach (var mb in FindObjectsOfType<MonoBehaviour>())
@@ -168,7 +194,7 @@ public class LevelResetSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// 动态对象快照 —— 恢复时总是从 prefab 重建（含排队销毁的对象），
+    /// 动态对象快照 —— 支持多实例：先统一清理同名旧对象，再逐个从 prefab 重建；
     /// 无 prefab 时退回恢复位置
     /// </summary>
     private class ObjectSnapshot
@@ -180,6 +206,9 @@ public class LevelResetSystem : MonoBehaviour
         private readonly Quaternion rotation;
         private readonly Transform parent;
 
+        public GameObject Prefab => prefab;
+        public string ObjectName => objectName;
+
         public ObjectSnapshot(GameObject gameObject, GameObject prefab)
         {
             this.gameObject = gameObject;
@@ -190,36 +219,40 @@ public class LevelResetSystem : MonoBehaviour
             parent = gameObject.transform.parent;
         }
 
-        public void Restore()
+        /// <summary>清理所有同名旧对象（含 inactive 与排队销毁的）</summary>
+        public void CleanupSameName()
         {
-            if (prefab != null)
+            foreach (var go in FindObjectsOfType<GameObject>(true))
             {
-                // 清理所有同名旧对象（含 inactive 与排队销毁的，避免多次重建残留），再从 prefab 重建
-                foreach (var go in FindObjectsOfType<GameObject>(true))
+                if (go != null && go.name == objectName)
                 {
-                    if (go != null && go.name == objectName)
-                    {
-                        go.SetActive(false);
-                        Destroy(go);
-                    }
+                    go.SetActive(false);
+                    Destroy(go);
                 }
-
-                GameObject instance = Instantiate(prefab, position, rotation);
-                instance.name = objectName;
-                if (parent != null)
-                    instance.transform.SetParent(parent, true);
             }
-            else if (gameObject != null)
+        }
+
+        /// <summary>从 prefab 重建一个实例到记录位置</summary>
+        public void RebuildFromPrefab()
+        {
+            GameObject instance = Instantiate(prefab, position, rotation);
+            instance.name = objectName;
+            if (parent != null)
+                instance.transform.SetParent(parent, true);
+        }
+
+        /// <summary>无 prefab 时恢复位置（对象已销毁则跳过）</summary>
+        public void RestorePosition()
+        {
+            if (gameObject == null) return;
+
+            gameObject.transform.position = position;
+            gameObject.transform.rotation = rotation;
+            var rb = gameObject.GetComponent<Rigidbody2D>();
+            if (rb != null)
             {
-                // 无 prefab 时退回恢复位置
-                gameObject.transform.position = position;
-                gameObject.transform.rotation = rotation;
-                var rb = gameObject.GetComponent<Rigidbody2D>();
-                if (rb != null)
-                {
-                    rb.velocity = Vector2.zero;
-                    rb.angularVelocity = 0f;
-                }
+                rb.velocity = Vector2.zero;
+                rb.angularVelocity = 0f;
             }
         }
     }

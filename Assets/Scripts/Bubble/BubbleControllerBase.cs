@@ -22,6 +22,11 @@ public abstract class BubbleControllerBase : MonoBehaviour
 
     private void OnEnable()
     {
+        // 提前初始化：Instantiate 时 OnEnable 立即执行而 Start 稍后才执行，
+        // 若此期间收到死亡/碰撞事件，bubbleBase 为 null 会抛异常（如关卡重置重建气泡时）
+        if (bubbleBase == null)
+            bubbleBase = GetComponent<BubbleBase>();
+
         GameEvents.Listen(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
         GameEvents.Listen(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
         GameEvents.Listen(EventType.PLAYER_EVENT_ON_DEATH, OnPlayerDeath);
@@ -106,6 +111,11 @@ public abstract class BubbleControllerBase : MonoBehaviour
 
     private void OnPlayerDeath(IGameEvent evt)
     {
+        // 防御：重建的气泡 Start 未执行时 bubbleBase 可能为 null
+        if (bubbleBase == null)
+            bubbleBase = GetComponent<BubbleBase>();
+        if (bubbleBase == null) return;
+
         bubbleBase.Burst();
     }
 

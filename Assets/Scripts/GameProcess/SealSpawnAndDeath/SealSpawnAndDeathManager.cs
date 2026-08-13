@@ -1,8 +1,11 @@
+using System.Collections;
 using UnityEngine;
 
 public class SealSpawnAndDeathManager : MonoBehaviour
 {
     [SerializeField] private Seal sealPrefab;
+
+    private bool isRespawning;
 
     private void OnEnable()
     {
@@ -25,9 +28,17 @@ public class SealSpawnAndDeathManager : MonoBehaviour
         var args = evt as PlayerEventArgs;
         if (args == null) return;
 
-        Debug.Log("[SealSpawnAndDeathManager] 收到角色死亡事件，准备重生");
+        // 同一帧多次死亡事件（如多水雷连锁爆炸）只重生一次，避免生成多个 Seal
+        if (isRespawning) return;
+        isRespawning = true;
+        StartCoroutine(ResetRespawnFlag());
 
-        // 销毁信息池中的 Seal 并在出生点重新生成
         SealSpawnAndDeathUtility.RespawnAtSpawnPoint(sealPrefab);
+    }
+
+    private IEnumerator ResetRespawnFlag()
+    {
+        yield return null;
+        isRespawning = false;
     }
 }

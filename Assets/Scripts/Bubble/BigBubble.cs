@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum BigBubbleState { BeforeRelease, AfterRelease }
 
-public class BigBubble : BubbleBase
+public class BigBubble : BubbleBase, ILevelResetable
 {
     public BigBubbleState State { get; private set; } = BigBubbleState.BeforeRelease;
 
@@ -17,6 +17,11 @@ public class BigBubble : BubbleBase
 
     /// <summary>是否正在被海豹吸收</summary>
     public bool IsBeingAbsorbed => AbsorbStateMachine.IsAbsorbing();
+
+    /// <summary>关卡恢复完成回调（场景自带的大气泡参与重置；角色吐出的不参与）</summary>
+    public void OnLevelRestore()
+    {
+    }
 
     public override void Burst()
     {

@@ -15,19 +15,53 @@ public class MineExplosionController : MonoBehaviour
     [LabelText("爆炸范围"), MinValue(0), SuffixLabel("m", Overlay = true)]
     [SerializeField] private float explosionRadius = 2f;
 
+    [FoldoutGroup("爆炸设置")]
+    [LabelText("爆炸延迟"), MinValue(0), SuffixLabel("秒", Overlay = true)]
+    [SerializeField] private float explosionDelay = 0f;
+
+    [FoldoutGroup("爆炸设置")]
+    [LabelText("出生保护时间"), MinValue(0), SuffixLabel("秒", Overlay = true)]
+    [SerializeField] private float spawnGracePeriod = 1f;
+
     private bool hasExploded;
+    private bool isTriggered;
+    private float delayTimer;
+    private float spawnGraceTimer;
+
+    private void Awake()
+    {
+        // 出生保护：防止关卡重置重建后立即检测到重生角色而再次引爆
+        spawnGraceTimer = spawnGracePeriod;
+    }
 
     private void FixedUpdate()
     {
         if (hasExploded) return;
 
-        // 检测范围内有 Seal 或小鱼 → 爆炸
+        // 出生保护期内不检测
+        if (spawnGraceTimer > 0f)
+        {
+            spawnGraceTimer -= Time.fixedDeltaTime;
+            return;
+        }
+
+        // 已触发 → 等待延迟后爆炸
+        if (isTriggered)
+        {
+            delayTimer -= Time.fixedDeltaTime;
+            if (delayTimer <= 0f)
+                Explode();
+            return;
+        }
+
+        // 检测范围内有 Seal 或小鱼 → 触发（延迟后爆炸）
         var hits = Physics2D.OverlapCircleAll(transform.position, detectRadius);
         foreach (var hit in hits)
         {
             if (hit.GetComponent<Seal>() != null || hit.GetComponent<SmallFishController>() != null)
             {
-                Explode();
+                isTriggered = true;
+                delayTimer = explosionDelay;
                 return;
             }
         }
