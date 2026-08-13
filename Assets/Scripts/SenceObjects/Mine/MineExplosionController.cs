@@ -65,6 +65,16 @@ public class MineExplosionController : MonoBehaviour
         spawnGraceTimer = spawnGracePeriod;
     }
 
+    /// <summary>Scene 视图选中时显示检测范围（黄）与爆炸范围（红）</summary>
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(1f, 0.85f, 0.2f, 0.6f);
+        Gizmos.DrawWireSphere(transform.position, detectRadius);
+
+        Gizmos.color = new Color(1f, 0.25f, 0.1f, 0.8f);
+        Gizmos.DrawWireSphere(transform.position, explosionRadius);
+    }
+
     private void FixedUpdate()
     {
         if (hasExploded) return;

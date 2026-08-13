@@ -105,6 +105,13 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
         if (moveDirection == Vector2.zero) moveDirection = Vector2.right;
     }
 
+    /// <summary>Scene 视图选中时显示气泡检测范围（黄）</summary>
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(1f, 0.85f, 0.2f, 0.6f);
+        Gizmos.DrawWireSphere(transform.position, detectRadius);
+    }
+
     private void Update()
     {
         switch (fsm.CurrentState)

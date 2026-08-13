@@ -11712,7 +11712,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionDelay
-      value: 5
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
+      propertyPath: explosionRadius
+      value: 1.3
       objectReference: {fileID: 0}
     - target: {fileID: 5212470626652386644, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_LocalPosition.x
