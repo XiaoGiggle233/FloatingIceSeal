@@ -16,7 +16,7 @@ public class LevelResetSystem : MonoBehaviour
     private readonly List<ObjectSnapshot> objectSnapshots = new List<ObjectSnapshot>();
     private bool hasCaptured;
     private bool captureScheduled;
-    private int lastRestoreFrame = -1;
+    private bool restorePending;
 
     private void OnEnable()
     {
@@ -34,12 +34,12 @@ public class LevelResetSystem : MonoBehaviour
 
     private void OnResetLevel(IGameEvent evt)
     {
-        RestoreState();
+        ScheduleRestore();
     }
 
     private void OnPlayerDeath(IGameEvent evt)
     {
-        RestoreState();
+        ScheduleRestore();
     }
 
     private void OnPlayerSpawn(IGameEvent evt)
@@ -48,6 +48,21 @@ public class LevelResetSystem : MonoBehaviour
         if (hasCaptured || captureScheduled) return;
         captureScheduled = true;
         StartCoroutine(CaptureStateNextFrame());
+    }
+
+    /// <summary>安排下一帧恢复（同帧多次事件只安排一次）</summary>
+    private void ScheduleRestore()
+    {
+        if (restorePending) return;
+        restorePending = true;
+        StartCoroutine(RestoreStateNextFrame());
+    }
+
+    private IEnumerator RestoreStateNextFrame()
+    {
+        yield return null;
+        restorePending = false;
+        RestoreState();
     }
 
     private IEnumerator CaptureStateNextFrame()
@@ -67,13 +82,9 @@ public class LevelResetSystem : MonoBehaviour
         hasCaptured = tilemapSnapshots.Count > 0 && objectSnapshots.Count > 0;
     }
 
-    /// <summary>将关卡恢复到记录的初始状态（同一帧多次触发只恢复一次，避免连锁爆炸反复重建）</summary>
+    /// <summary>将关卡恢复到记录的初始状态</summary>
     public void RestoreState()
     {
-        // 同帧内多次事件（如多水雷连锁爆炸）只恢复一次
-        if (lastRestoreFrame == Time.frameCount) return;
-        lastRestoreFrame = Time.frameCount;
-
         if (!hasCaptured) CaptureState();
 
         // 先重建/恢复对象，再铺瓦片（重建的 Tilemap 机制可被重新铺上瓦片）
@@ -84,7 +95,7 @@ public class LevelResetSystem : MonoBehaviour
     private void CaptureTilemaps()
     {
         tilemapSnapshots.Clear();
-        foreach (var tm in FindObjectsOfType<Tilemap>())
+        foreach (var tm in FindObjectsOfType<Tilemap>(true))
         {
             tilemapSnapshots.Add(new TilemapSnapshot(tm));
         }
@@ -104,17 +115,28 @@ public class LevelResetSystem : MonoBehaviour
     private GameObject FindPrefab(string objectName)
     {
         if (resetablePrefabs == null) return null;
+        // Unity 对重名实例自动加 " (1)" 后缀，匹配时忽略（Mine (1) -> Mine）
+        string normalized = NormalizeInstanceName(objectName);
         foreach (var prefab in resetablePrefabs)
         {
-            if (prefab != null && prefab.name == objectName) return prefab;
+            if (prefab != null && NormalizeInstanceName(prefab.name) == normalized) return prefab;
         }
         return null;
     }
 
+    /// <summary>去掉 Unity 自动添加的 " (n)" 重名后缀</summary>
+    private static string NormalizeInstanceName(string name)
+    {
+        int idx = name.IndexOf(" (");
+        return idx > 0 ? name.Substring(0, idx) : name;
+    }
+
     private void RestoreTilemaps()
     {
+        // 已使用集合：多个同名 Tilemap（如 2 个 FloatingIce）按快照顺序一对一配对恢复
+        var used = new HashSet<Tilemap>();
         foreach (var snapshot in tilemapSnapshots)
-            snapshot.Restore();
+            snapshot.Restore(used);
     }
 
     private void RestoreObjects()
@@ -143,14 +165,14 @@ public class LevelResetSystem : MonoBehaviour
         }
 
         // 恢复完成后回调（重算内部缓存）
-        foreach (var mb in FindObjectsOfType<MonoBehaviour>())
+        foreach (var mb in FindObjectsOfType<MonoBehaviour>(true))
         {
             if (mb is ILevelResetable resetable)
                 resetable.OnLevelRestore();
         }
     }
 
-    /// <summary>单个 Tilemap 的瓦片快照（按名称匹配恢复，支持对象销毁重建）</summary>
+    /// <summary>单个 Tilemap 的瓦片快照（规范化名匹配，多实例按快照顺序一对一配对恢复）</summary>
     private class TilemapSnapshot
     {
         private readonly string tilemapName;
@@ -158,7 +180,7 @@ public class LevelResetSystem : MonoBehaviour
 
         public TilemapSnapshot(Tilemap tilemap)
         {
-            tilemapName = tilemap.gameObject.name;
+            tilemapName = NormalizeInstanceName(tilemap.gameObject.name);
             BoundsInt bounds = tilemap.cellBounds;
             for (int x = bounds.xMin; x < bounds.xMax; x++)
             {
@@ -171,10 +193,11 @@ public class LevelResetSystem : MonoBehaviour
             }
         }
 
-        public void Restore()
+        public void Restore(HashSet<Tilemap> used)
         {
-            var tilemap = FindTilemap(tilemapName);
+            var tilemap = FindTilemap(tilemapName, used);
             if (tilemap == null) return;
+            used.Add(tilemap);
 
             // 先清空快照记录的格子，再恢复瓦片（爆炸破坏的瓦片被重新铺上）
             foreach (var cell in tiles.Keys)
@@ -183,11 +206,12 @@ public class LevelResetSystem : MonoBehaviour
                 tilemap.SetTile(kv.Key, kv.Value);
         }
 
-        private static Tilemap FindTilemap(string name)
+        private static Tilemap FindTilemap(string name, HashSet<Tilemap> used)
         {
-            foreach (var tm in FindObjectsOfType<Tilemap>())
+            foreach (var tm in FindObjectsOfType<Tilemap>(true))
             {
-                if (tm.gameObject.name == name) return tm;
+                if (used.Contains(tm)) continue;
+                if (NormalizeInstanceName(tm.gameObject.name) == name) return tm;
             }
             return null;
         }
@@ -202,6 +226,7 @@ public class LevelResetSystem : MonoBehaviour
         private readonly GameObject gameObject;
         private readonly GameObject prefab;
         private readonly string objectName;
+        private readonly string originalName;
         private readonly Vector3 position;
         private readonly Quaternion rotation;
         private readonly Transform parent;
@@ -213,18 +238,19 @@ public class LevelResetSystem : MonoBehaviour
         {
             this.gameObject = gameObject;
             this.prefab = prefab;
-            objectName = gameObject.name;
+            objectName = NormalizeInstanceName(gameObject.name);
+            originalName = gameObject.name;
             position = gameObject.transform.position;
             rotation = gameObject.transform.rotation;
             parent = gameObject.transform.parent;
         }
 
-        /// <summary>清理所有同名旧对象（含 inactive 与排队销毁的）</summary>
+        /// <summary>清理所有同名旧对象（含 inactive 与排队销毁的，忽略重名后缀）</summary>
         public void CleanupSameName()
         {
             foreach (var go in FindObjectsOfType<GameObject>(true))
             {
-                if (go != null && go.name == objectName)
+                if (go != null && NormalizeInstanceName(go.name) == objectName)
                 {
                     go.SetActive(false);
                     Destroy(go);
@@ -236,7 +262,7 @@ public class LevelResetSystem : MonoBehaviour
         public void RebuildFromPrefab()
         {
             GameObject instance = Instantiate(prefab, position, rotation);
-            instance.name = objectName;
+            instance.name = originalName;
             if (parent != null)
                 instance.transform.SetParent(parent, true);
         }
