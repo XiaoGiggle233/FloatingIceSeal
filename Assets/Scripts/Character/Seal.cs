@@ -45,6 +45,10 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
     [ShowInInspector]
     public ProtectionState CurrentProtectionState => ProtectionStateMachine?.CurrentState ?? ProtectionState.Unprotected;
 
+    public BubblePlumeStateMachine BubblePlumeStateMachine { get; private set; }
+    [ShowInInspector]
+    public BubblePlumeState CurrentBubblePlumeState => BubblePlumeStateMachine?.CurrentState ?? BubblePlumeState.NotInBubblePlume;
+
     #endregion
 
     #region 碰撞检测
@@ -86,6 +90,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         ActionStateMachine = new ActionStateMachine(this);
         DirectionStateMachine = new DirectionStateMachine(this);
         ProtectionStateMachine = new ProtectionStateMachine(this);
+        BubblePlumeStateMachine = new BubblePlumeStateMachine(this);
     }
 
     private void Start()
@@ -112,6 +117,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         ActionStateMachine.Update();
         DirectionStateMachine.Update();
         ProtectionStateMachine.Update();
+        BubblePlumeStateMachine.Update();
     }
 
     private void FixedUpdate()
@@ -122,6 +128,7 @@ public class Seal : MonoBehaviour, ICollisionEventPublisher
         ActionStateMachine.FixedUpdate();
         DirectionStateMachine.FixedUpdate();
         ProtectionStateMachine.FixedUpdate();
+        BubblePlumeStateMachine.FixedUpdate();
     }
 
     #endregion

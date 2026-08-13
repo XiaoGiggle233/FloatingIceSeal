@@ -32,6 +32,13 @@ public class SealOxygenController : MonoBehaviour
     {
         if (!seal.LifeStateMachine.IsAlive()) return;
 
+        // 在气泡柱内 → 按空气中速率恢复氧气
+        if (seal.BubblePlumeStateMachine.IsInBubblePlume())
+        {
+            RecoverOxygen(model.OxygenRecoverRate * Time.deltaTime);
+            return;
+        }
+
         float exposeRatio = GetExposeRatio();
 
         if (exposeRatio >= model.OxygenRecoverExposeRatio)

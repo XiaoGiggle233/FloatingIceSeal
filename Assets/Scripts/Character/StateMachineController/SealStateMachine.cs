@@ -472,3 +472,64 @@ public class ProtectionStateMachine
 }
 
 #endregion
+
+#region ========== 7. 气泡柱状态机 (BubblePlumeStateMachine) ==========
+
+public enum BubblePlumeState { NotInBubblePlume, InBubblePlume }
+
+public abstract class BubblePlumeStateBase : SealState<BubblePlumeStateMachine>
+{
+    protected BubblePlumeStateBase(Seal owner, BubblePlumeStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class NotInBubblePlumeState : BubblePlumeStateBase
+{
+    public NotInBubblePlumeState(Seal owner, BubblePlumeStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class InBubblePlumeState : BubblePlumeStateBase
+{
+    public InBubblePlumeState(Seal owner, BubblePlumeStateMachine fsm) : base(owner, fsm) { }
+}
+
+public class BubblePlumeStateMachine
+{
+    private Seal owner;
+
+    public BubblePlumeState CurrentState { get; private set; }
+    private BubblePlumeStateBase currentLeafState;
+
+    public NotInBubblePlumeState NotInBubblePlumeState { get; }
+    public InBubblePlumeState InBubblePlumeState { get; }
+
+    public BubblePlumeStateMachine(Seal owner)
+    {
+        this.owner = owner;
+        NotInBubblePlumeState = new NotInBubblePlumeState(owner, this);
+        InBubblePlumeState = new InBubblePlumeState(owner, this);
+    }
+
+    public void Update() => currentLeafState?.Update();
+    public void FixedUpdate() => currentLeafState?.FixedUpdate();
+
+    public void EnterLeafState(BubblePlumeStateBase newState)
+    {
+        if (currentLeafState == newState) return;
+        currentLeafState?.Exit();
+        currentLeafState = newState;
+        currentLeafState?.Enter();
+    }
+
+    public void SetState(BubblePlumeState state)
+    {
+        if (CurrentState == state) return;
+        CurrentState = state;
+        GameEvents.Publish(EventType.PLAYER_EVENT_ON_STATE_CHANGE,
+            new GameStateEventArgs(state.ToString()));
+    }
+
+    public bool IsNotInBubblePlume() => CurrentState == BubblePlumeState.NotInBubblePlume;
+    public bool IsInBubblePlume() => CurrentState == BubblePlumeState.InBubblePlume;
+}
+
+#endregion
