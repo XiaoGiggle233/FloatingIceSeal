@@ -1212,7 +1212,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 1.625
+  orthographic size: 1.65
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -11107,6 +11107,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1234567890123406, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
+      propertyPath: moveSpeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1234567890123406, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
       propertyPath: chaseSpeed
       value: 1.15
       objectReference: {fileID: 0}
@@ -11116,6 +11120,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1234567890123406, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
       propertyPath: initialDirection.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1234567890123406, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
+      propertyPath: obstacleCheckDistance
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
