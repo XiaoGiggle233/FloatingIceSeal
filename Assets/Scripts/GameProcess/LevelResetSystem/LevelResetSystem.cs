@@ -233,6 +233,8 @@ public class LevelResetSystem : MonoBehaviour
         private readonly Vector3 localScale;
         private readonly Collider2DSnapshot colliderSnapshot;
         private readonly MineExplosionSettings? explosionSettings;
+        private readonly SmallFishSettings? fishSettings;
+        private readonly SmallFishProtectionSettings? fishProtectionSettings;
 
         public GameObject Prefab => prefab;
         public string ObjectName => objectName;
@@ -253,6 +255,13 @@ public class LevelResetSystem : MonoBehaviour
 
             var explosion = gameObject.GetComponent<MineExplosionController>();
             explosionSettings = explosion != null ? explosion.CaptureSettings() : (MineExplosionSettings?)null;
+
+            var fish = gameObject.GetComponent<SmallFishController>();
+            fishSettings = fish != null ? fish.CaptureSettings() : (SmallFishSettings?)null;
+
+            var fishProtection = gameObject.GetComponent<SmallFishProtectionController>();
+            fishProtectionSettings = fishProtection != null
+                ? fishProtection.CaptureSettings() : (SmallFishProtectionSettings?)null;
         }
 
         /// <summary>清理所有同名旧对象（含 inactive 与排队销毁的，忽略重名后缀）</summary>
@@ -291,6 +300,20 @@ public class LevelResetSystem : MonoBehaviour
                 var explosion = instance.GetComponent<MineExplosionController>();
                 if (explosion != null)
                     explosion.RestoreSettings(explosionSettings.Value);
+            }
+
+            // 还原小鱼行为/保护参数
+            if (fishSettings.HasValue)
+            {
+                var fish = instance.GetComponent<SmallFishController>();
+                if (fish != null)
+                    fish.RestoreSettings(fishSettings.Value);
+            }
+            if (fishProtectionSettings.HasValue)
+            {
+                var fishProtection = instance.GetComponent<SmallFishProtectionController>();
+                if (fishProtection != null)
+                    fishProtection.RestoreSettings(fishProtectionSettings.Value);
             }
         }
 

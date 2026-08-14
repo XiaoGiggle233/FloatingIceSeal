@@ -54,7 +54,7 @@ public interface ILevelResetable
   - `CaptureState()`：记录关卡初始状态——场景所有 Tilemap 的瓦片快照 + 所有 `ILevelResetable` 对象的位置/旋转（按名称匹配 `resetablePrefabs` 数组记录重建用的 prefab）
   - **自动记录**：监听 `PLAYER_EVENT_ON_SPAWN`（角色出生）→ 延迟一帧执行 `CaptureState()`（仅首次，重生不重记录；`CaptureState` 仍是公开方法可手动调用）
   - 监听 `UI_EVENT_ON_RESET_LEVEL` + `PLAYER_EVENT_ON_DEATH` → `RestoreState()`：**先重建/恢复对象，再铺瓦片**。瓦片快照**按 Tilemap 名称匹配**恢复（支持对象销毁重建后引用不失效）；动态对象快照**总是从 prefab 重建**（先按名称清理所有同名旧对象含 inactive，再 `Instantiate` 到记录位置并恢复父级），无 prefab 时退回恢复位置；最后调用所有 `ILevelResetable.OnLevelRestore()`
-  - **重建还原 Inspector 覆盖参数**：`ObjectSnapshot` 捕获时记录 `localScale` + `Collider2D` 参数（isTrigger/offset/Circle 的 radius）+ 水雷爆炸参数（`MineExplosionController.CaptureSettings()`）；`RebuildFromPrefab()` 重建后依次写回，避免场景中调过的水雷参数（检测范围/爆炸范围/爆炸延迟/出生保护时间）变回 prefab 初始值
+  - **重建还原 Inspector 覆盖参数**：`ObjectSnapshot` 捕获时记录 `localScale` + `Collider2D` 参数（isTrigger/offset/Circle 的 radius）+ 水雷爆炸参数（`MineExplosionController.CaptureSettings()`）+ 小鱼行为/保护参数（`SmallFishController.CaptureSettings()` / `SmallFishProtectionController.CaptureSettings()`）；`RebuildFromPrefab()` 重建后依次写回，避免场景中调过的参数（检测范围/爆炸范围/爆炸延迟/出生保护时间/小鱼速度/检测半径等）变回 prefab 初始值
   - ⚠️ 必须"总是重建"的原因：水雷 `Explode()` 同步发布死亡事件，此时 `Destroy` 尚在排队，若只"存在则恢复位置"，水雷随后销毁却不会重建；且多次死亡后旧对象残留同名，需按名称全量清理
   - `resetablePrefabs`：Inspector 配置可重建对象 prefab（水雷 `Assets/Prefabs/Mine.prefab`、木箱 `Assets/Prefabs/TileMap/WoodBox.prefab`、浮冰 `Assets/Prefabs/FlowingIce/FloatingIce.prefab`）
 - **已实现 `ILevelResetable`**：`MineController`、`WoodBoxController`（`OnLevelRestore` 重算浮力偏移）、`FloatingIceController`
@@ -107,8 +107,8 @@ public interface ILevelResetable
 
 - 脚本（三个）：`SenceObjects/SmallFish/SmallFishController.cs`（注册 `"SmallFishList"` + `"SmallFish"`、移动/追踪/吸泡核心逻辑、暴露 `IsProtected()`）+ `SmallFishSpriteController.cs`（按移动方向 `flipX`，模仿海豹 `SealSpriteController`）+ `SmallFishProtectionController.cs`（气泡保护检测，仿照海豹 `SealProtectionStateMachineController`）
 - Prefab：`Assets/Prefabs/SmallFish.prefab`（SpriteRenderer 素材由用户提供）
-- 参数（`SmallFishController`，全部 Inspector 可调）：`detectRadius`（气泡检测范围）/ `moveSpeed`（正常速度）/ `chaseSpeed`（追踪速度）/ `obstacleCheckDistance` / `initialDirection` / `waitDuration`（发现气泡后等待，默认 0.5s）/ `contactRadius`（接触判定半径）/ `absorbDuration`（吸泡计时）
-- 参数（`SmallFishProtectionController`）：`protectedThreshold`（覆盖判定阈值，默认 0.5）/ `sampleGridSize`（采样网格，默认 8）
+- 参数（`SmallFishController`，全部 Inspector 可调）：`detectRadius`（气泡检测范围）/ `moveSpeed`（正常速度）/ `chaseSpeed`（追踪速度）/ `obstacleCheckDistance` / `initialDirection` / `waitDuration`（发现气泡后等待，默认 0.5s）/ `contactRadius`（接触判定半径）/ `absorbDuration`（吸泡计时）；`CaptureSettings()`/`RestoreSettings()` 供 LevelResetSystem 重建后还原 Inspector 覆盖参数（`RestoreSettings` 同时按 `initialDirection` 同步移动方向）
+- 参数（`SmallFishProtectionController`）：`protectedThreshold`（覆盖判定阈值，默认 0.5）/ `sampleGridSize`（采样网格，默认 8）；同样提供 `CaptureSettings()`/`RestoreSettings()` 供重建还原
 - 逻辑：
   - **漫游**：沿当前方向移动，`RaycastAll` 检测前方非 Trigger 障碍 → 反向（海豹、水草不算障碍）
   - **检测**：`OverlapCircleAll(detectRadius)` 找 `BigBubble` 且 `State == AfterRelease`（玩家释放）→ 停止 → 等待 `waitDuration` → 追踪；目标需射线可达（海豹、水草、铁丝网不算障碍）

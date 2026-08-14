@@ -4,9 +4,9 @@ using UnityEngine;
 
 /// <summary>
 /// 海豹精灵控制器
-/// 监听状态机变化事件，根据氧气状态和生命状态切换对应的 Sprite
+/// 监听状态机变化事件，根据氧气状态和生命状态切换对应的 Sprite，
+/// 并根据方向状态翻转/旋转子物体 Sprite（只旋转子物体，不影响碰撞体）
 /// </summary>
-[RequireComponent(typeof(SpriteRenderer))]
 public class SealSpriteController : MonoBehaviour
 {
     #region 精灵序列化字段
@@ -48,7 +48,7 @@ public class SealSpriteController : MonoBehaviour
 
     private void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         seal = GetComponent<Seal>();
     }
 
@@ -65,7 +65,7 @@ public class SealSpriteController : MonoBehaviour
     private void Start()
     {
         ApplySpriteByState();
-        ApplyFlipByDirection(seal.DirectionStateMachine.CurrentState);
+        ApplyFlipAndRotation(seal.DirectionStateMachine.CurrentState);
     }
 
     #endregion
@@ -77,10 +77,10 @@ public class SealSpriteController : MonoBehaviour
         var args = evt as GameStateEventArgs;
         if (args == null) return;
 
-        // 方向变化：翻转 Sprite X 轴
+        // 方向变化：翻转 Sprite X 轴并旋转
         if (Enum.TryParse(args.StateName, out DirectionState dirState))
         {
-            ApplyFlipByDirection(dirState);
+            ApplyFlipAndRotation(dirState);
             return;
         }
 
@@ -89,17 +89,44 @@ public class SealSpriteController : MonoBehaviour
 
     #endregion
 
-    #region 精灵切换与翻转
+    #region 精灵切换与翻转旋转
 
-    /// <summary>根据方向状态翻转 Sprite X 轴</summary>
-    private void ApplyFlipByDirection(DirectionState state)
+    /// <summary>根据方向状态翻转 Sprite X 轴并旋转子物体 Sprite</summary>
+    private void ApplyFlipAndRotation(DirectionState state)
     {
-        spriteRenderer.flipX = state switch
+        // 纯上/下状态没有左右信息：沿用当前 flipX 保存的最后一次水平朝向（flipX=true 朝右）
+        bool facingLeft = !spriteRenderer.flipX;
+
+        switch (state)
         {
-            DirectionState.Right or DirectionState.UpRight or DirectionState.DownRight => true,
-            DirectionState.Left or DirectionState.UpLeft or DirectionState.DownLeft => false,
-            _ => spriteRenderer.flipX
+            case DirectionState.Left:
+            case DirectionState.UpLeft:
+            case DirectionState.DownLeft:
+                facingLeft = true;
+                break;
+            case DirectionState.Right:
+            case DirectionState.UpRight:
+            case DirectionState.DownRight:
+                facingLeft = false;
+                break;
+        }
+
+        spriteRenderer.flipX = !facingLeft;
+
+        // 上：朝左顺时针90°、朝右逆时针90°；下：朝左逆时针90°、朝右顺时针90°
+        // 左上顺时针45°、右上逆时针45°、左下逆时针45°、右下顺时针45°；左/右不旋转
+        float zAngle = state switch
+        {
+            DirectionState.Up => facingLeft ? -90f : 90f,
+            DirectionState.Down => facingLeft ? 90f : -90f,
+            DirectionState.UpLeft => -45f,
+            DirectionState.UpRight => 45f,
+            DirectionState.DownLeft => 45f,
+            DirectionState.DownRight => -45f,
+            _ => 0f
         };
+
+        spriteRenderer.transform.localRotation = Quaternion.Euler(0f, 0f, zAngle);
     }
 
     private void ApplySpriteByState()

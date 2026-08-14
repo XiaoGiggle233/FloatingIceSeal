@@ -1,5 +1,18 @@
 using UnityEngine;
 
+/// <summary>小鱼气泡保护参数快照 —— 关卡重置从 prefab 重建后还原场景 Inspector 覆盖值</summary>
+public struct SmallFishProtectionSettings
+{
+    public float protectedThreshold;
+    public int sampleGridSize;
+
+    public SmallFishProtectionSettings(float protectedThreshold, int sampleGridSize)
+    {
+        this.protectedThreshold = protectedThreshold;
+        this.sampleGridSize = sampleGridSize;
+    }
+}
+
 /// <summary>
 /// 小鱼气泡保护检测 —— 小鱼碰撞体被泡泡碰撞体覆盖 ≥50% 时视为受保护，水雷不会炸死小鱼
 /// （逻辑仿照 SealProtectionStateMachineController）
@@ -22,6 +35,17 @@ public class SmallFishProtectionController : MonoBehaviour
     {
         fishCollider = GetComponent<Collider2D>();
         bubbleLayerMask = LayerMask.GetMask("Bubble");
+    }
+
+    /// <summary>捕获当前保护参数（关卡重置重建后由 LevelResetSystem 还原）</summary>
+    public SmallFishProtectionSettings CaptureSettings() =>
+        new SmallFishProtectionSettings(protectedThreshold, sampleGridSize);
+
+    /// <summary>还原保护参数（关卡重置重建后由 LevelResetSystem 调用）</summary>
+    public void RestoreSettings(SmallFishProtectionSettings settings)
+    {
+        protectedThreshold = settings.protectedThreshold;
+        sampleGridSize = settings.sampleGridSize;
     }
 
     private void Update()

@@ -13,16 +13,20 @@ public class SealDirectionController : MonoBehaviour
 
     private Seal seal;
     private Rigidbody2D rb;
+    private CapsuleCollider2D capsuleCollider;
+    private DirectionState lastDirection = DirectionState.Right;
 
     private void Awake()
     {
         seal = GetComponent<Seal>();
         rb = GetComponent<Rigidbody2D>();
+        capsuleCollider = GetComponent<CapsuleCollider2D>();
     }
 
     private void Start()
     {
         seal.DirectionStateMachine.SetState(DirectionState.Right);
+        ApplyColliderDirection(DirectionState.Right);
     }
 
     private void Update()
@@ -36,6 +40,16 @@ public class SealDirectionController : MonoBehaviour
         DirectionState dir = AngleToDirection(angle);
 
         seal.DirectionStateMachine.SetState(dir);
+        ApplyColliderDirection(dir);
+    }
+
+    private void ApplyColliderDirection(DirectionState dir)
+    {
+        if (dir == lastDirection) return;
+        lastDirection = dir;
+
+        bool isVertical = dir == DirectionState.Up || dir == DirectionState.Down;
+        capsuleCollider.direction = isVertical ? CapsuleDirection2D.Vertical : CapsuleDirection2D.Horizontal;
     }
 
     #region 角度转换

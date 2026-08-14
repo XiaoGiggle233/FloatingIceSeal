@@ -2,6 +2,35 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
+/// <summary>小鱼行为参数快照 —— 关卡重置从 prefab 重建后还原场景 Inspector 覆盖值</summary>
+public struct SmallFishSettings
+{
+    public float detectRadius;
+    public float moveSpeed;
+    public float chaseSpeed;
+    public float obstacleCheckDistance;
+    public Vector2 initialDirection;
+    public float waitDuration;
+    public float contactRadius;
+    public float stopDistance;
+    public float absorbDuration;
+
+    public SmallFishSettings(float detectRadius, float moveSpeed, float chaseSpeed,
+        float obstacleCheckDistance, Vector2 initialDirection, float waitDuration,
+        float contactRadius, float stopDistance, float absorbDuration)
+    {
+        this.detectRadius = detectRadius;
+        this.moveSpeed = moveSpeed;
+        this.chaseSpeed = chaseSpeed;
+        this.obstacleCheckDistance = obstacleCheckDistance;
+        this.initialDirection = initialDirection;
+        this.waitDuration = waitDuration;
+        this.contactRadius = contactRadius;
+        this.stopDistance = stopDistance;
+        this.absorbDuration = absorbDuration;
+    }
+}
+
 /// <summary>
 /// 小鱼控制器 —— 漫游移动（遇障碍转向）、检测玩家释放的大气泡并追踪、
 /// 接触气泡后计时破裂（计时结束恢复漫游）
@@ -63,6 +92,28 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
 
     /// <summary>是否被气泡保护（气泡覆盖 ≥ 阈值时水雷不会炸死小鱼）</summary>
     public bool IsProtected() => protection != null && protection.IsProtected;
+
+    /// <summary>捕获当前行为参数（关卡重置重建后由 LevelResetSystem 还原）</summary>
+    public SmallFishSettings CaptureSettings() =>
+        new SmallFishSettings(detectRadius, moveSpeed, chaseSpeed, obstacleCheckDistance,
+            initialDirection, waitDuration, contactRadius, stopDistance, absorbDuration);
+
+    /// <summary>还原行为参数（关卡重置重建后由 LevelResetSystem 调用，同步移动方向）</summary>
+    public void RestoreSettings(SmallFishSettings settings)
+    {
+        detectRadius = settings.detectRadius;
+        moveSpeed = settings.moveSpeed;
+        chaseSpeed = settings.chaseSpeed;
+        obstacleCheckDistance = settings.obstacleCheckDistance;
+        initialDirection = settings.initialDirection;
+        waitDuration = settings.waitDuration;
+        contactRadius = settings.contactRadius;
+        stopDistance = settings.stopDistance;
+        absorbDuration = settings.absorbDuration;
+
+        moveDirection = initialDirection.normalized;
+        if (moveDirection == Vector2.zero) moveDirection = Vector2.right;
+    }
 
     private void OnEnable()
     {

@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 海豹体型控制器
-/// 监听氧气状态机变化，根据氧气状态调整胶囊碰撞体尺寸
+/// 监听氧气/方向状态机变化，根据氧气状态调整胶囊碰撞体尺寸，竖向时 x、y 对调
 /// </summary>
 [RequireComponent(typeof(CapsuleCollider2D))]
 public class SealShapeController : MonoBehaviour
@@ -22,32 +22,45 @@ public class SealShapeController : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.Listen(EventType.PLAYER_EVENT_ON_STATE_CHANGE, OnOxygenStateChanged);
+        GameEvents.Listen(EventType.PLAYER_EVENT_ON_STATE_CHANGE, OnStateChanged);
     }
 
     private void OnDisable()
     {
-        GameEvents.Unlisten(EventType.PLAYER_EVENT_ON_STATE_CHANGE, OnOxygenStateChanged);
+        GameEvents.Unlisten(EventType.PLAYER_EVENT_ON_STATE_CHANGE, OnStateChanged);
     }
 
     private void Start()
     {
-        ApplyShapeByState(seal.OxygenStateMachine.CurrentState);
+        ApplyShapeByState(seal.OxygenStateMachine.CurrentState, seal.DirectionStateMachine.CurrentState);
     }
 
-    private void OnOxygenStateChanged(IGameEvent evt)
+    private void OnStateChanged(IGameEvent evt)
     {
         var args = evt as GameStateEventArgs;
         if (args == null) return;
 
-        if (!Enum.TryParse(args.StateName, out OxygenState state)) return;
+        if (Enum.TryParse(args.StateName, out OxygenState oxygenState))
+        {
+            ApplyShapeByState(oxygenState, seal.DirectionStateMachine.CurrentState);
+            return;
+        }
 
-        ApplyShapeByState(state);
+        // 方向变化时按新方向重算尺寸，使竖向对调生效
+        if (Enum.TryParse(args.StateName, out DirectionState directionState))
+            ApplyShapeByState(seal.OxygenStateMachine.CurrentState, directionState);
     }
 
-    private void ApplyShapeByState(OxygenState state)
+    private void ApplyShapeByState(OxygenState state, DirectionState direction)
     {
         SealShapeData shape = model.GetShapeData(state);
-        capsuleCollider.size = new Vector2(shape.rectHeight + 2f * shape.radius, 2f * shape.radius);
+        Vector2 size = new Vector2(shape.rectHeight + 2f * shape.radius, 2f * shape.radius);
+
+        // 竖向时胶囊体 x、y 对调
+        bool isVertical = direction == DirectionState.Up || direction == DirectionState.Down;
+        if (isVertical)
+            size = new Vector2(size.y, size.x);
+
+        capsuleCollider.size = size;
     }
 }
