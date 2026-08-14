@@ -165,8 +165,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   oxygen: 8
-  speed: 1
-  outOfWaterBurstDistance: 0.5
+  speed: 0.4
+  outOfWaterBurstDistance: 0.03
 --- !u!114 &8303405811335513659
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -191,6 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d17c588d668d7b7498e03c877730f74a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  breakSpeedFactor: 0.2
 --- !u!114 &962354872013482766
 MonoBehaviour:
   m_ObjectHideFlags: 0

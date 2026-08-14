@@ -132,8 +132,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 0.2, y: 0.2}
+  m_Offset: {x: -0.052661754, y: 0.003974325}
+  m_Size: {x: 0.38084137, y: 0.35501}
   m_Direction: 1
 --- !u!114 &5133253584458040315
 MonoBehaviour:
@@ -149,36 +149,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   oxygenValue: 0
   OxygenMaxValue: 100
-  OxygenConsumeRate: 5
+  OxygenConsumeRate: 4.46
   OxygenRecoverRate: 20
   OxygenFullThreshold: 0.8
   OxygenSufficientThreshold: 0.5
   OxygenInsufficientThreshold: 0.25
   OxygenCriticalThreshold: 0.01
   SuffocatingDeathTimer: 2
-  OxygenRecoverExposeRatio: 0.1
-  AirMoveSpeed: 1.5
+  OxygenRecoverExposeRatio: 0.266
+  AirMoveSpeed: 0.77
   LandMoveSpeed: 1
   WaterMoveSpeed: 2
   DashSpeed: 4
   DashDistance: 2.5
-  DashOxygenCost: 15
+  DashOxygenCost: 18.68
   VelocitySmoothTime: 0.1
   BlowBubbleChargeOxygenRate: 15
   BlowBubbleSpawnOffset: 0.3
-  BubbleAbsorbRate: 5
+  BubbleAbsorbRate: 20.47
   GravityScale: 2
   InvincibilityDuration: 2
   HurtBounceSpeed: 5
   HurtBounceDistance: 0.5
   OxygenFullShape:
-    radius: 0.1
+    radius: 0.17
     rectHeight: 0
   OxygenSufficientShape:
-    radius: 0.04
+    radius: 0.15
     rectHeight: 0.02
   OxygenInsufficientShape:
-    radius: 0.05
+    radius: 0.14
     rectHeight: 0.06
   OxygenCriticalShape:
     radius: 0.05
