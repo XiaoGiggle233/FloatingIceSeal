@@ -16,18 +16,19 @@ public class SealBlowBubbleController : MonoBehaviour
     private Seal seal;
     private SealModel model;
     private SealOxygenController oxygenController;
+    private SpriteRenderer spriteRenderer;
 
     private bool isCharging;
     private BubbleBase currentBubble;
     private Rigidbody2D bubbleRb;
     private float chargedOxygen;
-    private DirectionState lastHorizontalDirection = DirectionState.Right;
 
     private void Awake()
     {
         seal = GetComponent<Seal>();
         model = GetComponent<SealModel>();
         oxygenController = GetComponent<SealOxygenController>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     private void OnEnable()
@@ -55,8 +56,6 @@ public class SealBlowBubbleController : MonoBehaviour
 
     private void Update()
     {
-        TrackLastHorizontalDirection();
-
         if (!seal.LifeStateMachine.IsAlive() || !seal.EnvironmentStateMachine.IsInWater())
         {
             if (isCharging) ReleaseBubble();
@@ -81,36 +80,14 @@ public class SealBlowBubbleController : MonoBehaviour
         }
     }
 
-    private void TrackLastHorizontalDirection()
-    {
-        switch (seal.CurrentDirectionState)
-        {
-            case DirectionState.Left:
-            case DirectionState.UpLeft:
-            case DirectionState.DownLeft:
-            case DirectionState.Right:
-            case DirectionState.UpRight:
-            case DirectionState.DownRight:
-                lastHorizontalDirection = seal.CurrentDirectionState;
-                break;
-        }
-    }
-
     private Vector3 GetSpawnPosition()
     {
-        Vector3 offset;
-        switch (lastHorizontalDirection)
-        {
-            case DirectionState.Left:
-            case DirectionState.UpLeft:
-            case DirectionState.DownLeft:
-                offset = Vector3.left * model.BlowBubbleSpawnOffset;
-                break;
-            default:
-                offset = Vector3.right * model.BlowBubbleSpawnOffset;
-                break;
-        }
-        return transform.position + offset;
+        // 偏移方向与精灵一致：flipX 决定水平朝向，再叠加子物体 Sprite 的旋转
+        Vector3 direction = Vector3.right;
+        if (spriteRenderer != null)
+            direction = spriteRenderer.transform.localRotation * (spriteRenderer.flipX ? Vector3.right : Vector3.left);
+
+        return transform.position + direction * model.BlowBubbleSpawnOffset;
     }
 
     private void StartCharging()
