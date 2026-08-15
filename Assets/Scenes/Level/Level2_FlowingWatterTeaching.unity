@@ -2016,7 +2016,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 1.626087
+  orthographic size: 1.8
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -2104,9 +2104,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ComponentVersion: 1
-  m_AssetsPPU: 115
-  m_RefResolutionX: 384
-  m_RefResolutionY: 216
+  m_AssetsPPU: 100
+  m_RefResolutionX: 576
+  m_RefResolutionY: 324
   m_CropFrame: 0
   m_GridSnapping: 0
   m_FilterMode: 0
@@ -2143,6 +2143,7 @@ MonoBehaviour:
   VerticalSpeedStepDistance: 2
   OverviewStartSpeed: 5
   OverviewReturnSpeed: 5
+  _defaultState: 0
 --- !u!1 &528462000
 GameObject:
   m_ObjectHideFlags: 0
