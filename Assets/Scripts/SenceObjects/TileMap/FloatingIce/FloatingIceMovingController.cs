@@ -1,6 +1,24 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+/// <summary>浮冰移动参数快照 —— 关卡重置从 prefab 重建后还原场景 Inspector 覆盖值</summary>
+public struct FloatingIceMovingSettings
+{
+    public float waterReturnSpeed;
+    public float airReturnSpeed;
+    public float waterCheckDistance;
+    public float snapDistance;
+
+    public FloatingIceMovingSettings(float waterReturnSpeed, float airReturnSpeed,
+        float waterCheckDistance, float snapDistance)
+    {
+        this.waterReturnSpeed = waterReturnSpeed;
+        this.airReturnSpeed = airReturnSpeed;
+        this.waterCheckDistance = waterCheckDistance;
+        this.snapDistance = snapDistance;
+    }
+}
+
 /// <summary>
 /// 浮冰移动控制器
 /// 控制 TileMap 在偏离初始位置后以不同速度回归（水中/空中速度不同）
@@ -33,6 +51,19 @@ public class FloatingIceMovingController : MonoBehaviour
     private void Start()
     {
         initialPosition = transform.position;
+    }
+
+    /// <summary>捕获当前移动参数（关卡重置重建后由 LevelResetSystem 还原）</summary>
+    public FloatingIceMovingSettings CaptureSettings() =>
+        new FloatingIceMovingSettings(waterReturnSpeed, airReturnSpeed, waterCheckDistance, snapDistance);
+
+    /// <summary>还原移动参数（关卡重置重建后由 LevelResetSystem 调用）</summary>
+    public void RestoreSettings(FloatingIceMovingSettings settings)
+    {
+        waterReturnSpeed = settings.waterReturnSpeed;
+        airReturnSpeed = settings.airReturnSpeed;
+        waterCheckDistance = settings.waterCheckDistance;
+        snapDistance = settings.snapDistance;
     }
 
     private void FixedUpdate()

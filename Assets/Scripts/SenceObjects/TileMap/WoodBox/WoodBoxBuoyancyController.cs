@@ -1,6 +1,23 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+/// <summary>木箱浮力参数快照 —— 关卡重置从 prefab 重建后还原场景 Inspector 覆盖值</summary>
+public struct WoodBoxBuoyancySettings
+{
+    public float buoyancyForce;
+    public float mass;
+    public float linearDrag;
+    public float snapDistance;
+
+    public WoodBoxBuoyancySettings(float buoyancyForce, float mass, float linearDrag, float snapDistance)
+    {
+        this.buoyancyForce = buoyancyForce;
+        this.mass = mass;
+        this.linearDrag = linearDrag;
+        this.snapDistance = snapDistance;
+    }
+}
+
 /// <summary>
 /// 木箱浮力控制器 —— 在水中受浮力自动上浮至水面，到达后固定在水面
 /// 目标位置基于木箱 tile 的包围盒计算（tile 底部贴水面），而非 Tilemap 物体本身
@@ -36,6 +53,25 @@ public class WoodBoxBuoyancyController : MonoBehaviour
         rb.mass = mass;
         rb.drag = linearDrag;
         RecacheTileGeometry();
+    }
+
+    /// <summary>捕获当前浮力参数（关卡重置重建后由 LevelResetSystem 还原）</summary>
+    public WoodBoxBuoyancySettings CaptureSettings() =>
+        new WoodBoxBuoyancySettings(buoyancyForce, mass, linearDrag, snapDistance);
+
+    /// <summary>还原浮力参数（关卡重置重建后由 LevelResetSystem 调用，同步写入刚体）</summary>
+    public void RestoreSettings(WoodBoxBuoyancySettings settings)
+    {
+        buoyancyForce = settings.buoyancyForce;
+        mass = settings.mass;
+        linearDrag = settings.linearDrag;
+        snapDistance = settings.snapDistance;
+
+        if (rb != null)
+        {
+            rb.mass = mass;
+            rb.drag = linearDrag;
+        }
     }
 
     /// <summary>遍历非空 tile 计算包围盒，缓存中心 X 与底部 Y 相对 transform 的偏移（爆炸破坏瓦片后需重新调用）</summary>

@@ -192,6 +192,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   breakSpeedFactor: 0.2
+  absorbSpeedFactor: 0.2
 --- !u!114 &962354872013482766
 MonoBehaviour:
   m_ObjectHideFlags: 0

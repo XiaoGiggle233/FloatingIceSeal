@@ -219,7 +219,8 @@ public class LevelResetSystem : MonoBehaviour
 
     /// <summary>
     /// 动态对象快照 —— 支持多实例：先统一清理同名旧对象，再逐个从 prefab 重建；
-    /// 无 prefab 时退回恢复位置；重建时还原 Inspector 覆盖参数（缩放、collider、水雷爆炸参数）
+    /// 无 prefab 时退回恢复位置；重建时还原 Inspector 覆盖参数（缩放、collider、
+    /// 水雷爆炸参数、小鱼行为/保护参数、浮冰移动参数、木箱浮力参数）与子物体状态
     /// </summary>
     private class ObjectSnapshot
     {
@@ -232,9 +233,13 @@ public class LevelResetSystem : MonoBehaviour
         private readonly Transform parent;
         private readonly Vector3 localScale;
         private readonly Collider2DSnapshot colliderSnapshot;
+        private readonly RendererSortingSnapshot rendererSorting;
         private readonly MineExplosionSettings? explosionSettings;
         private readonly SmallFishSettings? fishSettings;
         private readonly SmallFishProtectionSettings? fishProtectionSettings;
+        private readonly FloatingIceMovingSettings? floatingIceSettings;
+        private readonly WoodBoxBuoyancySettings? woodBoxSettings;
+        private readonly List<ChildSnapshot> childSnapshots = new List<ChildSnapshot>();
 
         public GameObject Prefab => prefab;
         public string ObjectName => objectName;
@@ -253,6 +258,10 @@ public class LevelResetSystem : MonoBehaviour
             var collider = gameObject.GetComponent<Collider2D>();
             colliderSnapshot = collider != null ? new Collider2DSnapshot(collider) : null;
 
+            // 记录顶层 Renderer 的图层排序（sorting layer / order in layer）
+            var renderer = gameObject.GetComponent<Renderer>();
+            rendererSorting = renderer != null ? new RendererSortingSnapshot(renderer) : null;
+
             var explosion = gameObject.GetComponent<MineExplosionController>();
             explosionSettings = explosion != null ? explosion.CaptureSettings() : (MineExplosionSettings?)null;
 
@@ -262,6 +271,18 @@ public class LevelResetSystem : MonoBehaviour
             var fishProtection = gameObject.GetComponent<SmallFishProtectionController>();
             fishProtectionSettings = fishProtection != null
                 ? fishProtection.CaptureSettings() : (SmallFishProtectionSettings?)null;
+
+            var floatingIce = gameObject.GetComponent<FloatingIceMovingController>();
+            floatingIceSettings = floatingIce != null
+                ? floatingIce.CaptureSettings() : (FloatingIceMovingSettings?)null;
+
+            var woodBox = gameObject.GetComponent<WoodBoxBuoyancyController>();
+            woodBoxSettings = woodBox != null
+                ? woodBox.CaptureSettings() : (WoodBoxBuoyancySettings?)null;
+
+            // 记录直接子物体状态（名称、顺序、本地变换、激活），恢复时还原子物体
+            for (int i = 0; i < gameObject.transform.childCount; i++)
+                childSnapshots.Add(new ChildSnapshot(gameObject.transform.GetChild(i), i));
         }
 
         /// <summary>清理所有同名旧对象（含 inactive 与排队销毁的，忽略重名后缀）</summary>
@@ -294,6 +315,14 @@ public class LevelResetSystem : MonoBehaviour
                     colliderSnapshot.Restore(collider);
             }
 
+            // 还原图层排序（sorting layer / order in layer）
+            if (rendererSorting != null)
+            {
+                var renderer = instance.GetComponent<Renderer>();
+                if (renderer != null)
+                    rendererSorting.Restore(renderer);
+            }
+
             // 还原水雷爆炸参数
             if (explosionSettings.HasValue)
             {
@@ -315,6 +344,25 @@ public class LevelResetSystem : MonoBehaviour
                 if (fishProtection != null)
                     fishProtection.RestoreSettings(fishProtectionSettings.Value);
             }
+
+            // 还原浮冰移动参数
+            if (floatingIceSettings.HasValue)
+            {
+                var floatingIce = instance.GetComponent<FloatingIceMovingController>();
+                if (floatingIce != null)
+                    floatingIce.RestoreSettings(floatingIceSettings.Value);
+            }
+
+            // 还原木箱浮力参数
+            if (woodBoxSettings.HasValue)
+            {
+                var woodBox = instance.GetComponent<WoodBoxBuoyancyController>();
+                if (woodBox != null)
+                    woodBox.RestoreSettings(woodBoxSettings.Value);
+            }
+
+            // 还原子物体（prefab 内定义的按名称恢复，场景动态添加的重新挂载）
+            RestoreChildren(instance.transform);
         }
 
         /// <summary>无 prefab 时恢复位置（对象已销毁则跳过）</summary>
@@ -330,6 +378,106 @@ public class LevelResetSystem : MonoBehaviour
                 rb.velocity = Vector2.zero;
                 rb.angularVelocity = 0f;
             }
+
+            // 还原图层排序（运行时可能被修改）
+            if (rendererSorting != null)
+            {
+                var renderer = gameObject.GetComponent<Renderer>();
+                if (renderer != null)
+                    rendererSorting.Restore(renderer);
+            }
+
+            RestoreChildren(gameObject.transform);
+        }
+
+        /// <summary>按快照还原子物体：恢复同名子物体的顺序、本地变换与激活状态</summary>
+        private void RestoreChildren(Transform target)
+        {
+            foreach (var childSnapshot in childSnapshots)
+                childSnapshot.Restore(target);
+        }
+    }
+
+    /// <summary>
+    /// 直接子物体快照 —— 记录名称、兄弟顺序、本地变换、激活状态与图层排序；
+    /// 恢复时优先匹配父级下同名子物体，原始子物体仍存活（排队销毁中）则重新挂载
+    /// </summary>
+    private class ChildSnapshot
+    {
+        private readonly string name;
+        private readonly int siblingIndex;
+        private readonly Vector3 localPosition;
+        private readonly Quaternion localRotation;
+        private readonly Vector3 localScale;
+        private readonly bool activeSelf;
+        private readonly RendererSortingSnapshot rendererSorting;
+        private readonly Transform originalChild;
+
+        public ChildSnapshot(Transform child, int siblingIndex)
+        {
+            name = child.name;
+            this.siblingIndex = siblingIndex;
+            localPosition = child.localPosition;
+            localRotation = child.localRotation;
+            localScale = child.localScale;
+            activeSelf = child.gameObject.activeSelf;
+            originalChild = child;
+
+            var renderer = child.GetComponent<Renderer>();
+            rendererSorting = renderer != null ? new RendererSortingSnapshot(renderer) : null;
+        }
+
+        public void Restore(Transform parent)
+        {
+            Transform child = null;
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                if (parent.GetChild(i).name == name)
+                {
+                    child = parent.GetChild(i);
+                    break;
+                }
+            }
+
+            // 父级下找不到（场景动态添加、prefab 中不存在的子物体）→ 原始子物体仍存活则挂回
+            if (child == null && originalChild != null)
+            {
+                originalChild.SetParent(parent, true);
+                child = originalChild;
+            }
+            if (child == null) return;
+
+            child.SetSiblingIndex(Mathf.Min(siblingIndex, parent.childCount - 1));
+            child.localPosition = localPosition;
+            child.localRotation = localRotation;
+            child.localScale = localScale;
+            child.gameObject.SetActive(activeSelf);
+
+            if (rendererSorting != null)
+            {
+                var renderer = child.GetComponent<Renderer>();
+                if (renderer != null)
+                    rendererSorting.Restore(renderer);
+            }
+        }
+    }
+
+    /// <summary>Renderer 图层排序快照 —— 记录 sorting layer 与 order in layer</summary>
+    private class RendererSortingSnapshot
+    {
+        private readonly int sortingLayerID;
+        private readonly int sortingOrder;
+
+        public RendererSortingSnapshot(Renderer renderer)
+        {
+            sortingLayerID = renderer.sortingLayerID;
+            sortingOrder = renderer.sortingOrder;
+        }
+
+        public void Restore(Renderer renderer)
+        {
+            renderer.sortingLayerID = sortingLayerID;
+            renderer.sortingOrder = sortingOrder;
         }
     }
 
