@@ -84,6 +84,9 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
     private float waitTimer;
     private float absorbTimer;
 
+    /// <summary>气泡检测范围（供锁定范围光源等使用）</summary>
+    public float DetectRadius => detectRadius;
+
     /// <summary>当前移动方向（供 sprite 翻转等使用）</summary>
     public Vector2 MoveDirection => moveDirection;
 
