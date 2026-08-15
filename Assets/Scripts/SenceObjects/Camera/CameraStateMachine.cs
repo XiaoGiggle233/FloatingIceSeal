@@ -249,6 +249,21 @@ public class CameraStateMachine
 
     public void Update() => currentLeafState?.Update();
 
+    /// <summary>
+    /// 切换指定状态（同时切换叶子状态与枚举值）
+    /// </summary>
+    public void EnterState(CameraState state)
+    {
+        switch (state)
+        {
+            case CameraState.Follow: EnterLeafState(FollowState); break;
+            case CameraState.Lock: EnterLeafState(LockState); break;
+            case CameraState.Overview: EnterLeafState(OverviewState); break;
+            case CameraState.Vertical: EnterLeafState(VerticalState); break;
+        }
+        CurrentState = state;
+    }
+
     public void EnterLeafState(CameraStateBase newState)
     {
         if (currentLeafState == newState) return;

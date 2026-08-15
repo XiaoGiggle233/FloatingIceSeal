@@ -93,9 +93,15 @@ public class SealCameraFollow : MonoBehaviour
     [SerializeField, LabelText("返回角色速度"), MinValue(0.01f), SuffixLabel("unit/s", Overlay = true)]
     public float OverviewReturnSpeed = 5f;
 
+    [FoldoutGroup("状态设置")]
+    [SerializeField, LabelText("默认状态"), EnumToggleButtons, Tooltip("摄像机退出锁定/全览等状态后进入的状态")]
+    private CameraState _defaultState = CameraState.Follow;
+
+    public CameraState DefaultState => _defaultState;
+
     [FoldoutGroup("调试", expanded: true)]
     [ShowInInspector, ReadOnly, LabelText("当前摄像机状态")]
-    public CameraState CurrentCameraState => StateMachine?.CurrentState ?? CameraState.Follow;
+    public CameraState CurrentCameraState => StateMachine?.CurrentState ?? DefaultState;
 
     [FoldoutGroup("调试")]
     [ShowInInspector, ReadOnly, LabelText("当前状态对象")]
@@ -127,8 +133,7 @@ public class SealCameraFollow : MonoBehaviour
             TargetRb = _target.GetComponent<Rigidbody2D>();
 
         CacheBounds();
-        StateMachine.EnterLeafState(StateMachine.FollowState);
-        StateMachine.SetState(CameraState.Follow);
+        StateMachine.EnterState(DefaultState);
     }
 
     private void LateUpdate()
@@ -214,6 +219,23 @@ public class SealCameraFollow : MonoBehaviour
     }
 
     /// <summary>
+    /// 编辑器中绘制缓冲范围矩形，便于配置缓冲宽度/高度
+    /// </summary>
+    private void OnDrawGizmosSelected()
+    {
+        DrawBufferRect(FollowBufferWidth, FollowBufferHeight, new Color(1f, 0.85f, 0.2f, 0.6f));
+        DrawBufferRect(VerticalBufferWidth, VerticalBufferHeight, new Color(0f, 1f, 1f, 0.6f));
+    }
+
+    private void DrawBufferRect(float width, float height, Color color)
+    {
+        if (width <= 0f || height <= 0f) return;
+
+        Gizmos.color = color;
+        Gizmos.DrawWireCube(transform.position, new Vector3(width, height, 0.1f));
+    }
+
+    /// <summary>
     /// 匀速过渡正交视野大小
     /// </summary>
     public void TransitionViewSize(float target, float speed)
@@ -279,8 +301,7 @@ public class SealCameraFollow : MonoBehaviour
 
     private void DoReleaseLock()
     {
-        StateMachine.EnterLeafState(StateMachine.FollowState);
-        StateMachine.SetState(CameraState.Follow);
+        StateMachine.EnterState(DefaultState);
         ActiveLockData = null;
     }
 
@@ -303,14 +324,13 @@ public class SealCameraFollow : MonoBehaviour
     }
 
     /// <summary>
-    /// 退出全览状态：恢复跟随状态
+    /// 退出全览状态：进入默认状态
     /// </summary>
     public void ReleaseOverview()
     {
         if (!StateMachine.IsOverview()) return;
 
-        StateMachine.EnterLeafState(StateMachine.FollowState);
-        StateMachine.SetState(CameraState.Follow);
+        StateMachine.EnterState(DefaultState);
         ActiveOverviewData = null;
     }
     public void SetTarget(Seal seal)
