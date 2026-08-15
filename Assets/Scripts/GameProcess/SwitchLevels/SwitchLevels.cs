@@ -58,7 +58,10 @@ public class SwitchLevels : MonoBehaviour
         SaveManager.SetCurrentLevel(slotIndex, nextLevel);
 
         // 切换至下一关卡：先记录目标场景，再进入加载场景
-        string nextSceneName = $"Level{nextLevel}";
+        // 宽松匹配：优先 "Level{序号}"，其次 "Level{序号}_{后缀}"
+        string nextSceneName = LevelSceneUtility.FindSceneName(nextLevel);
+        if (string.IsNullOrEmpty(nextSceneName))
+            nextSceneName = $"Level{nextLevel}";
         InformationPool.Set("TargetSceneName", nextSceneName);
         SceneManager.LoadScene("LoadingSence");
     }

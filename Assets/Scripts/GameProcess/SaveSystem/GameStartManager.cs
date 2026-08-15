@@ -32,7 +32,14 @@ public class GameStartManager : MonoBehaviour
             SaveManager.Save(_currentSlotIndex, save);
         }
 
-        string sceneName = $"Level{save.currentLevel}";
+        // 匹配当前关卡场景：Level{序号} 或 Level{序号}_{后缀}
+        string sceneName = LevelSceneUtility.FindSceneName(save.currentLevel);
+        if (string.IsNullOrEmpty(sceneName))
+        {
+            Debug.LogError($"未找到关卡 {save.currentLevel} 对应的场景");
+            return;
+        }
+
         InformationPool.Set("CurrentSlotIndex", _currentSlotIndex);
         SceneManager.LoadScene(sceneName);
     }

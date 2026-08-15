@@ -8,19 +8,40 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LoadingSence.unity
     guid: 5f2e90053ffe1de49810bf307c276271
-  - enabled: 0
-    path: Assets/Scenes/Level/Old/SampleLevel.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
     path: Assets/Scenes/StartSence.unity
     guid: c687d4cf60422d24486769f422692e0d
   - enabled: 1
-    path: Assets/Scenes/Level/Old/SampleLevel 2.unity
-    guid: bee91a8a577c1f14faf1f1e3f1ab14b4
-  - enabled: 1
     path: Assets/Scenes/Level/_Level1.unity
     guid: 35c570af11633c043ab88fb92c5c5176
   - enabled: 1
-    path: Assets/Scenes/Level/_Level2.unity
-    guid: 1db3e9fd5a5db7a44a7c8e7dd163fd0e
+    path: Assets/Scenes/Level/Level1_FWSWI.unity
+    guid: 802404aa6df33b549a0211ff1a108f19
+  - enabled: 1
+    path: Assets/Scenes/Level/Level2_FlowingWatterTeaching.unity
+    guid: bb6f33ec60e1d6644b14559bf0243402
+  - enabled: 1
+    path: Assets/Scenes/Level/Level3_FWSW.unity
+    guid: 8c974fd61c9679941ae762f992e8755a
+  - enabled: 1
+    path: Assets/Scenes/Level/Level4_FWSWBB.unity
+    guid: 0baf6cc1de766364eb117205e1acc82f
+  - enabled: 1
+    path: Assets/Scenes/Level/Level6_SeagrassTeaching.unity
+    guid: 2ba131b1b44a8a941ac2cbcb19c9758a
+  - enabled: 1
+    path: Assets/Scenes/Level/Level7_SgSWFW.unity
+    guid: fa2ad03b7898c2041ae319c2eb4eca90
+  - enabled: 1
+    path: Assets/Scenes/Level/Level8_SWBBNM.unity
+    guid: 79826decfa7cc294f98faa3d50d74315
+  - enabled: 1
+    path: Assets/Scenes/Level/Level9_NMBB.unity
+    guid: 0bd08c765d903fa4aa5b095a4f653886
+  - enabled: 1
+    path: Assets/Scenes/Level/Level10_SmallFishTeaching.unity
+    guid: 2152e5485bfe65247a1ff113397d9865
+  - enabled: 1
+    path: Assets/Scenes/Level/Level11_SFNMWB.unity
+    guid: 40f107abc888f9948b444de507059978
   m_configObjects: {}
