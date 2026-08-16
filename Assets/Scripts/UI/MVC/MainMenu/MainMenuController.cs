@@ -17,6 +17,9 @@ public class MainMenuController : BaseController
         SetModel(_menuModel);
         _menuModel.Init();
         LoadCurrentSlotInfo();
+
+        // 供切换存档面板同步选中的槽位
+        RegisterFunc("SetCurrentSlotIndex", OnSetCurrentSlotIndex);
     }
 
     public override void OnLoadView(IBaseView view)
@@ -52,6 +55,14 @@ public class MainMenuController : BaseController
         _menuModel.CurrentLevel = (save != null && !save.isEmpty) ? save.currentLevel : 1;
     }
 
+    /// <summary>切换存档面板选中槽位后同步到主菜单模型</summary>
+    private void OnSetCurrentSlotIndex(object[] args)
+    {
+        if (args == null || args.Length == 0) return;
+        _menuModel.CurrentSlotIndex = Mathf.Clamp((int)args[0], 0, SaveManager.MaxSaveSlots - 1);
+        LoadCurrentSlotInfo();
+    }
+
     private void OnStartGame()
     {
         SaveData save = SaveManager.Load(_menuModel.CurrentSlotIndex);
@@ -63,7 +74,18 @@ public class MainMenuController : BaseController
             SaveManager.Save(_menuModel.CurrentSlotIndex, save);
         }
 
-        string sceneName = $"Level{save.currentLevel}";
+        // 按 Build Settings 中的实际场景名匹配（Level2 起场景名带后缀）
+        string sceneName = LevelSceneUtility.FindSceneName(save.currentLevel);
+        if (string.IsNullOrEmpty(sceneName))
+        {
+            // 关卡序号超出范围（如通关后）时，重置存档回到第一关
+            save.currentLevel = 1;
+            SaveManager.Save(_menuModel.CurrentSlotIndex, save);
+            sceneName = LevelSceneUtility.FindSceneName(1);
+            if (string.IsNullOrEmpty(sceneName))
+                sceneName = "Level1";
+        }
+
         InformationPool.Set("CurrentSlotIndex", _menuModel.CurrentSlotIndex);
         SceneManager.LoadScene(sceneName);
     }

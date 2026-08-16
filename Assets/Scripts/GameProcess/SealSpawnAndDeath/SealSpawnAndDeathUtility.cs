@@ -57,6 +57,11 @@ public static class SealSpawnAndDeathUtility
     public static Seal RespawnAtSpawnPoint(Seal sealPrefab)
     {
         var spawnPoint = GetSpawnPoint();
+
+        // 兜底：信息池尚未注册时（初始化顺序异常）直接按类型查找场景中的出生点
+        if (spawnPoint == null)
+            spawnPoint = Object.FindObjectOfType<SpawnPointController>();
+
         Vector3 pos = spawnPoint != null ? spawnPoint.transform.position : Vector3.zero;
         return RespawnSeal(sealPrefab, pos);
     }

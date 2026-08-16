@@ -74,6 +74,9 @@ public class SwitchSaveController : BaseController
         _saveModel.SelectedSlotIndex = index;
         _saveModel.RefreshSaves();
         _view?.Render(_saveModel);
+
+        // 同步选中槽位到主菜单，保证"开始游戏"使用该槽位
+        MVCManager.ControllerManager.ApplyFunc(ControllerType.MainMenu, "SetCurrentSlotIndex", index);
     }
 
     private void OnCopyClicked()
@@ -96,6 +99,9 @@ public class SwitchSaveController : BaseController
         _saveModel.RefreshSaves();
         _view?.Render(_saveModel);
         Debug.Log($"已将存档 {source + 1} 复制到槽位 {target + 1}");
+
+        // 复制后选中目标槽位，同步到主菜单
+        MVCManager.ControllerManager.ApplyFunc(ControllerType.MainMenu, "SetCurrentSlotIndex", target);
     }
 
     private void OnDeleteClicked()

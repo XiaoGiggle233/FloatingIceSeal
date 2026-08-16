@@ -29,7 +29,17 @@ public static class SaveManager
             return null;
 
         string json = PlayerPrefs.GetString(SAVE_KEY_PREFIX + slotIndex);
-        return JsonUtility.FromJson<SaveData>(json);
+        try
+        {
+            return JsonUtility.FromJson<SaveData>(json);
+        }
+        catch (System.Exception e)
+        {
+            // 存档数据损坏时按空槽处理，避免点击开始游戏时异常中断无响应
+            Debug.LogWarning($"[SaveManager] 槽位 {slotIndex} 存档损坏，已清除：{e.Message}");
+            Delete(slotIndex);
+            return null;
+        }
     }
 
     /// <summary>获取所有槽位的存档列表（包括空槽位）</summary>
