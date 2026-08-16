@@ -61,7 +61,7 @@ public class SwitchLevels : MonoBehaviour
         // 宽松匹配：优先 "Level{序号}"，其次 "Level{序号}_{后缀}"
         string nextSceneName = LevelSceneUtility.FindSceneName(nextLevel);
         if (string.IsNullOrEmpty(nextSceneName))
-            nextSceneName = $"Level{nextLevel}";
+            nextSceneName = "EndingSence"; // 匹配不到下一关时进入结局场景
         InformationPool.Set("TargetSceneName", nextSceneName);
         SceneManager.LoadScene("LoadingSence");
     }
