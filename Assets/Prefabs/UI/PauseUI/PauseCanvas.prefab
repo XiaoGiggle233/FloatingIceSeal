@@ -3294,7 +3294,7 @@ GameObject:
   - component: {fileID: 6648065644980294327}
   - component: {fileID: 3453744405472502754}
   m_Layer: 0
-  m_Name: Canvas
+  m_Name: PauseCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
