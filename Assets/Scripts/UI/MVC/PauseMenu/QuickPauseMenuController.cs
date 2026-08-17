@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 #region ========== 快速暂停菜单控制器 ==========
 
@@ -100,7 +101,10 @@ public class QuickPauseMenuController : BaseController
 
     private void OnMainMenuClicked()
     {
-        // 主菜单功能暂未实现
+        // 返回开始界面：先恢复时间缩放，再经加载场景切换（仿照 SwitchLevels）
+        Time.timeScale = 1f;
+        InformationPool.Set("TargetSceneName", "StartSence");
+        SceneManager.LoadScene("LoadingSence");
     }
 
     private void OnSettingsBackClicked()
