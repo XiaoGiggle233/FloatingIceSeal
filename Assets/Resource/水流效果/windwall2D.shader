@@ -8,8 +8,9 @@ Shader "Custom/WindWall2D"
         _FlowSpeed("Flow Speed",Float) = 0.6
         _Distort("Distort",Float) = 0.02
         _EdgeBright("Edge Bright",Float) = 1.0
-        _FadeTop("ÉÏ±ß½¥±äÇ¿¶È",Range(0,1)) = 0.2
-        _FadeBottom("ÏÂ±ß½¥±äÇ¿¶È",Range(0,1)) = 0.2
+        _TexScale("Tex Scale",Float) = 1
+        _FadeTop("ï¿½Ï±ß½ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½",Range(0,1)) = 0.2
+        _FadeBottom("ï¿½Â±ß½ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½",Range(0,1)) = 0.2
     }
         SubShader
         {
@@ -40,6 +41,7 @@ Shader "Custom/WindWall2D"
                 {
                     float2 uv : TEXCOORD0;
                     float2 uvNoise : TEXCOORD1;
+                    float2 localUv : TEXCOORD2;
                     float4 vertex : SV_POSITION;
                 };
 
@@ -51,6 +53,7 @@ Shader "Custom/WindWall2D"
                 float _FlowSpeed;
                 float _Distort;
                 float _EdgeBright;
+                float _TexScale;
                 float _FadeTop;
                 float _FadeBottom;
 
@@ -58,8 +61,13 @@ Shader "Custom/WindWall2D"
                 {
                     v2f o;
                     o.vertex = UnityObjectToClipPos(v.vertex);
-                    o.uv = TRANSFORM_TEX(v.uv,_MainTex);
-                    o.uvNoise = TRANSFORM_TEX(v.uv,_NoiseTex);
+                    // æå–ç‰©ä½“ XY ç¼©æ”¾ï¼Œçº¹ç†å¯†åº¦å›ºå®šåœ¨ä¸–ç•Œç©ºé—´ï¼Œæ‹‰ä¼¸ç‰©ä½“ä¸å†æ‹‰ä¼¸çº¹ç†
+                    float2 objScale = float2(
+                        length(float3(unity_ObjectToWorld._m00, unity_ObjectToWorld._m10, unity_ObjectToWorld._m20)),
+                        length(float3(unity_ObjectToWorld._m01, unity_ObjectToWorld._m11, unity_ObjectToWorld._m21)));
+                    o.uv = TRANSFORM_TEX(v.uv,_MainTex) * objScale * _TexScale;
+                    o.uvNoise = TRANSFORM_TEX(v.uv,_NoiseTex) * objScale * _TexScale;
+                    o.localUv = v.uv;
                     return o;
                 }
 
@@ -75,14 +83,14 @@ Shader "Custom/WindWall2D"
 
                     fixed4 col = tex2D(_MainTex,uvWind) * _Color;
 
-                    //×óÓÒ±ßÔµÌáÁÁ
-                    float edgeX = abs(i.uv.x - 0.5) * 2;
+                    //ï¿½ï¿½ï¿½Ò±ï¿½Ôµï¿½ï¿½ï¿½ï¿½
+                    float edgeX = abs(i.localUv.x - 0.5) * 2;
                     col.rgb *= lerp(1,2.2,saturate(edgeX * _EdgeBright));
 
-                    //ÉÏÏÂÕ­±ß½¥±ä£¬Ö»±ßÔµÒ»µãµãµ­³ö
+                    //ï¿½ï¿½ï¿½ï¿½Õ­ï¿½ß½ï¿½ï¿½ä£¬Ö»ï¿½ï¿½ÔµÒ»ï¿½ï¿½ãµ­ï¿½ï¿½
                     float fadeRange = 0.08;
-                    float topFactor = smoothstep(1 - fadeRange,1,i.uv.y);
-                    float botFactor = smoothstep(0,fadeRange,i.uv.y);
+                    float topFactor = smoothstep(1 - fadeRange,1,i.localUv.y);
+                    float botFactor = smoothstep(0,fadeRange,i.localUv.y);
 
                     float topAlpha = 1 - topFactor * _FadeTop;
                     float botAlpha = botFactor + (1 - botFactor) * (1 - _FadeBottom);

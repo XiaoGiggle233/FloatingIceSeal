@@ -3288,6 +3288,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: daa2e757411a79d449b1e7d4c912ea81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  flowFactor: 0.1
+  flowFactor: 0.05
   effectPrefab: {fileID: 6082131240372837002, guid: 0dd5e6f630b3dd044b330506bd79ad39, type: 3}
   sortingOrder: 7
