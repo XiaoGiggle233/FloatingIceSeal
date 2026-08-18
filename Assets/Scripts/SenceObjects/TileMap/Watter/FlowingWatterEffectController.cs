@@ -19,6 +19,9 @@ public class FlowingWatterEffectController : MonoBehaviour
     [Tooltip("生成面的 SortingOrder（水体 tilemap 为 -1，角色为 8，默认 7 在水体之上、角色之下）")]
     [SerializeField] private int sortingOrder = 7;
 
+    [Tooltip("水流区域在 tile 覆盖范围外，每条边向外延伸的距离")]
+    [SerializeField] private float extendDistance = 0.1f;
+
     private FlowingWatter flowingWatter;
     private Tilemap tilemap;
     private Transform effectTransform;
@@ -78,11 +81,15 @@ public class FlowingWatterEffectController : MonoBehaviour
         Bounds? bounds = CalculateTilesBounds();
         if (!bounds.HasValue) return;
 
+        // 在 tile 覆盖范围外各边延伸 extendDistance
+        Bounds effectBounds = bounds.Value;
+        effectBounds.Expand(extendDistance * 2f);
+
         GameObject effect = Instantiate(effectPrefab, transform);
         effectTransform = effect.transform;
-        effectSize = bounds.Value.size;
+        effectSize = effectBounds.size;
 
-        Vector3 localPos = transform.InverseTransformPoint(bounds.Value.center);
+        Vector3 localPos = transform.InverseTransformPoint(effectBounds.center);
         localPos.z = 0f;
         effectTransform.localPosition = localPos;
 
