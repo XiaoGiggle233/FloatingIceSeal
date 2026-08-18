@@ -114,8 +114,8 @@ public class MineExplosionController : MonoBehaviour
         if (hasExploded) return;
         hasExploded = true;
 
-        // 连锁：检测范围内其它水雷引爆
-        var chainHits = Physics2D.OverlapCircleAll(transform.position, detectRadius);
+        // 连锁：爆炸范围内其它水雷引爆
+        var chainHits = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
         foreach (var hit in chainHits)
         {
             var mine = hit.GetComponent<MineController>();
