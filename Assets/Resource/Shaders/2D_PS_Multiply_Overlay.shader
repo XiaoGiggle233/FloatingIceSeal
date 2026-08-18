@@ -6,6 +6,7 @@ Shader "Custom/2D_PS_Multiply_Overlay"
         _Opacity ("图层不透明度", Range(0,1)) = 1.0
         _BlendMode ("混合模式 0=正片叠底 1=强光", Range(0,1)) = 1
         _Saturation ("效果饱和度", Range(0,1)) = 1.0
+        _Brightness ("效果亮度", Range(0,2)) = 1.0
     }
 
     SubShader
@@ -54,6 +55,7 @@ Shader "Custom/2D_PS_Multiply_Overlay"
             float _Opacity;
             float _BlendMode;
             float _Saturation;
+            float _Brightness;
 
             Varyings vert(Attributes input)
             {
@@ -105,6 +107,9 @@ Shader "Custom/2D_PS_Multiply_Overlay"
                 // 只对混合结果降饱和，不影响底图
                 float resultLum = dot(resultRGB, half3(0.299, 0.587, 0.114));
                 resultRGB = lerp(resultLum.xxx, resultRGB, _Saturation);
+
+                // 只对混合结果调亮度，不影响底图
+                resultRGB *= _Brightness;
 
                 // 透明度插值混合
                 half3 finalCol = lerp(baseTex.rgb, resultRGB, top.a);
