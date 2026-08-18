@@ -30,6 +30,16 @@ public class FlowingWatter : MonoBehaviour
     [SuffixLabel("N", Overlay = true)]
     [SerializeField] private float forceAmount = 10f;
 
+    /// <summary>
+    /// 推力大小（供水流效果等子物体脚本读取）
+    /// </summary>
+    public float ForceAmount => forceAmount;
+
+    /// <summary>
+    /// 流动方向（供水流效果脚本读取）
+    /// </summary>
+    public FlowDirection FlowDirection => flowDirection;
+
     #region 碰撞事件
 
     private void OnEnable()
