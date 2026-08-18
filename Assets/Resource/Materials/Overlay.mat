@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Overlay
-  m_Shader: {fileID: 4800000, guid: 2d3c4b5a6978e0f123456789abcdef01, type: 3}
+  m_Shader: {fileID: 4800000, guid: 5144d8b85058c2f419b8a65be53b8b7f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
