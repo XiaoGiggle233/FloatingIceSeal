@@ -15166,7 +15166,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: detectRadius
-      value: 0.37
+      value: 0.43
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionDelay
@@ -15174,7 +15174,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionRadius
-      value: 0.59
+      value: 0.68
       objectReference: {fileID: 0}
     - target: {fileID: 5212470626652386644, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_LocalScale.x
