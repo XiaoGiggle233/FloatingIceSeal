@@ -373,7 +373,8 @@ public class LevelResetSystem : MonoBehaviour
             gameObject.transform.position = position;
             gameObject.transform.rotation = rotation;
             var rb = gameObject.GetComponent<Rigidbody2D>();
-            if (rb != null)
+            // Static 刚体（Tilemap 机制等）设置速度会报错，跳过
+            if (rb != null && rb.bodyType != RigidbodyType2D.Static)
             {
                 rb.velocity = Vector2.zero;
                 rb.angularVelocity = 0f;
@@ -399,7 +400,7 @@ public class LevelResetSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// 直接子物体快照 —— 记录名称、兄弟顺序、本地变换、激活状态与图层排序；
+    /// 直接子物体快照 —— 记录名称、兄弟顺序、本地变换、激活状态、图层排序与 sprite；
     /// 恢复时优先匹配父级下同名子物体，原始子物体仍存活（排队销毁中）则重新挂载
     /// </summary>
     private class ChildSnapshot
@@ -411,6 +412,8 @@ public class LevelResetSystem : MonoBehaviour
         private readonly Vector3 localScale;
         private readonly bool activeSelf;
         private readonly RendererSortingSnapshot rendererSorting;
+        private readonly Sprite sprite;
+        private readonly bool hasSpriteRenderer;
         private readonly Transform originalChild;
 
         public ChildSnapshot(Transform child, int siblingIndex)
@@ -425,6 +428,11 @@ public class LevelResetSystem : MonoBehaviour
 
             var renderer = child.GetComponent<Renderer>();
             rendererSorting = renderer != null ? new RendererSortingSnapshot(renderer) : null;
+
+            // 记录 sprite（prefab 中 Art 等子物体的 sprite 通常为空、场景里才设置，重建后会丢）
+            var spriteRenderer = child.GetComponent<SpriteRenderer>();
+            hasSpriteRenderer = spriteRenderer != null;
+            sprite = hasSpriteRenderer ? spriteRenderer.sprite : null;
         }
 
         public void Restore(Transform parent)
@@ -458,6 +466,13 @@ public class LevelResetSystem : MonoBehaviour
                 var renderer = child.GetComponent<Renderer>();
                 if (renderer != null)
                     rendererSorting.Restore(renderer);
+            }
+
+            if (hasSpriteRenderer)
+            {
+                var spriteRenderer = child.GetComponent<SpriteRenderer>();
+                if (spriteRenderer != null)
+                    spriteRenderer.sprite = sprite;
             }
         }
     }
