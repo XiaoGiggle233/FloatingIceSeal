@@ -182,7 +182,7 @@ MonoBehaviour:
   oxygenValue: 0
   OxygenMaxValue: 100
   OxygenConsumeRate: 4.46
-  OxygenRecoverRate: 20
+  OxygenRecoverRate: 30.09
   OxygenFullThreshold: 0.8
   OxygenSufficientThreshold: 0.5
   OxygenInsufficientThreshold: 0.25
