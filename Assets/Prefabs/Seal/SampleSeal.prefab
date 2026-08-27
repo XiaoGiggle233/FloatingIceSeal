@@ -386,12 +386,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0e4a56c7012c10449daa471c1828d17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  oxygenFullSprite: {fileID: 131344992, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
-  oxygenSufficientSprite: {fileID: -1205429656, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
-  oxygenInsufficientSprite: {fileID: 258695548, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
-  oxygenCriticalSprite: {fileID: 222216026, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
-  suffocatingSprite: {fileID: -753582365, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
-  deadSprite: {fileID: -1153952853, guid: e1ceeb8e34a027d41b5305525936cd58, type: 3}
+  framesPerMeter: 5
+  deathFps: 8
 --- !u!114 &819301234567890123
 MonoBehaviour:
   m_ObjectHideFlags: 0
