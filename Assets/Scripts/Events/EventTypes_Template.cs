@@ -152,9 +152,13 @@ public class PlayerEventArgs : GameEventBase
     /// <summary>玩家对象</summary>
     public object Player { get; }
 
-    public PlayerEventArgs(object player)
+    /// <summary>是否由手动重置触发（手动重置链发布的死亡事件，用于区分重生时机）</summary>
+    public bool IsManualReset { get; }
+
+    public PlayerEventArgs(object player, bool isManualReset = false)
     {
         Player = player;
+        IsManualReset = isManualReset;
     }
 }
 

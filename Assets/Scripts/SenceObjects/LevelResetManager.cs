@@ -19,7 +19,8 @@ public class LevelResetManager : MonoBehaviour
 
         SealSpawnAndDeathUtility.DestroySeal();
 
+        // 手动重置链的死亡事件带标记：角色立即重生，不走死亡延迟
         GameEvents.Publish(EventType.PLAYER_EVENT_ON_DEATH,
-            new PlayerEventArgs(sealGo));
+            new PlayerEventArgs(sealGo, true));
     }
 }

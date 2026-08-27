@@ -26,6 +26,13 @@ public class SealLifeController : MonoBehaviour
 
     private void OnStateChanged(IGameEvent evt)
     {
+        // 已死亡的角色（尸体保留期间）不再启动死亡倒计时
+        if (!seal.LifeStateMachine.IsAlive())
+        {
+            StopDeathCountdown();
+            return;
+        }
+
         if (seal.OxygenStateMachine.IsSuffocating())
         {
             if (deathCountdown == null)

@@ -12,11 +12,15 @@ public class LevelResetSystem : MonoBehaviour
     [Header("可重建对象 prefab（被销毁后重新生成，按名称匹配场景对象）")]
     [SerializeField] private GameObject[] resetablePrefabs;
 
+    [Header("角色死亡后延迟重置")]
+    [SerializeField] private float deathResetDelay = 1.5f;
+
     private readonly List<TilemapSnapshot> tilemapSnapshots = new List<TilemapSnapshot>();
     private readonly List<ObjectSnapshot> objectSnapshots = new List<ObjectSnapshot>();
     private bool hasCaptured;
     private bool captureScheduled;
     private bool restorePending;
+    private Coroutine deathRestoreCoroutine;
 
     private void OnEnable()
     {
@@ -30,15 +34,40 @@ public class LevelResetSystem : MonoBehaviour
         GameEvents.Unlisten(EventType.UI_EVENT_ON_RESET_LEVEL, OnResetLevel);
         GameEvents.Unlisten(EventType.PLAYER_EVENT_ON_DEATH, OnPlayerDeath);
         GameEvents.Unlisten(EventType.PLAYER_EVENT_ON_SPAWN, OnPlayerSpawn);
+        deathRestoreCoroutine = null;
     }
 
     private void OnResetLevel(IGameEvent evt)
     {
+        // 手动重置立即执行，并取消挂起的死亡延迟（手动重置链会附带发布死亡事件）
+        CancelDeathRestore();
         ScheduleRestore();
     }
 
     private void OnPlayerDeath(IGameEvent evt)
     {
+        ScheduleDeathRestore();
+    }
+
+    /// <summary>角色死亡后延迟一段时间再恢复（延迟期间重复死亡不重新计时）</summary>
+    private void ScheduleDeathRestore()
+    {
+        // 手动重置已安排恢复时（同帧附带死亡事件），不再延迟重复恢复
+        if (restorePending || deathRestoreCoroutine != null) return;
+        deathRestoreCoroutine = StartCoroutine(DeathRestoreCoroutine());
+    }
+
+    private void CancelDeathRestore()
+    {
+        if (deathRestoreCoroutine == null) return;
+        StopCoroutine(deathRestoreCoroutine);
+        deathRestoreCoroutine = null;
+    }
+
+    private IEnumerator DeathRestoreCoroutine()
+    {
+        yield return new WaitForSeconds(deathResetDelay);
+        deathRestoreCoroutine = null;
         ScheduleRestore();
     }
 
