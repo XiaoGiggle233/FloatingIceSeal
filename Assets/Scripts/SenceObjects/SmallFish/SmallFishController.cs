@@ -76,13 +76,19 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
     [LabelText("吸泡计时时长"), MinValue(0), SuffixLabel("秒", Overlay = true)]
     [SerializeField] private float absorbDuration = 1.5f;
 
+    [FoldoutGroup("死亡", expanded: true)]
+    [LabelText("死亡动画后销毁延迟"), MinValue(0), SuffixLabel("秒", Overlay = true)]
+    [SerializeField] private float deathDestroyDelay = 1f;
+
     private Rigidbody2D rb;
+    private Collider2D fishCollider;
     private SmallFishStateMachine fsm;
     private SmallFishProtectionController protection;
     private Vector2 moveDirection;
     private BigBubble targetBubble;
     private float waitTimer;
     private float absorbTimer;
+    private float deathTimer;
 
     /// <summary>当前移动方向（供 sprite 翻转等使用）</summary>
     public Vector2 MoveDirection => moveDirection;
@@ -92,6 +98,18 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
 
     /// <summary>是否被气泡保护（气泡覆盖 ≥ 阈值时水雷不会炸死小鱼）</summary>
     public bool IsProtected() => protection != null && protection.IsProtected;
+
+    /// <summary>死亡：进入死亡状态，播放死亡动画后延迟销毁（水雷爆炸等调用）</summary>
+    public void Die()
+    {
+        if (fsm.CurrentState == SmallFishState.Dead) return;
+
+        fsm.SetState(SmallFishState.Dead);
+        deathTimer = deathDestroyDelay;
+        targetBubble = null;
+        rb.velocity = Vector2.zero;
+        if (fishCollider != null) fishCollider.enabled = false; // 避免再次触发水雷/碰撞
+    }
 
     /// <summary>捕获当前行为参数（关卡重置重建后由 LevelResetSystem 还原）</summary>
     public SmallFishSettings CaptureSettings() =>
@@ -150,6 +168,7 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        fishCollider = GetComponent<Collider2D>();
         fsm = new SmallFishStateMachine();
         protection = GetComponent<SmallFishProtectionController>();
         moveDirection = initialDirection.normalized;
@@ -171,6 +190,7 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
             case SmallFishState.Wait: UpdateWait(); break;
             case SmallFishState.Chase: UpdateChase(); break;
             case SmallFishState.Break: UpdateBreak(); break;
+            case SmallFishState.Dead: UpdateDead(); break;
         }
     }
 
@@ -182,6 +202,7 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
             case SmallFishState.Wait: MoveStop(); break;
             case SmallFishState.Chase: MoveChase(); break;
             case SmallFishState.Break: MoveChase(); break; // 破坏时仍跟随气泡（气泡在移动）
+            case SmallFishState.Dead: MoveStop(); break;
         }
     }
 
@@ -253,6 +274,14 @@ public class SmallFishController : MonoBehaviour, ILevelResetable
             RestoreHorizontalMovement();
             fsm.SetState(SmallFishState.Patrol);
         }
+    }
+
+    /// <summary>死亡：计时结束销毁（关卡重置时由 LevelResetSystem 重建）</summary>
+    private void UpdateDead()
+    {
+        deathTimer -= Time.deltaTime;
+        if (deathTimer <= 0f)
+            Destroy(gameObject);
     }
 
     /// <summary>把移动方向重置为水平（保持当前左右朝向）</summary>

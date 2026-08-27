@@ -10,7 +10,9 @@ public enum SmallFishState
     /// <summary>追击：向目标气泡移动</summary>
     Chase,
     /// <summary>破坏：接触气泡后计时，计时结束气泡破裂</summary>
-    Break
+    Break,
+    /// <summary>死亡：被水雷炸死，播放死亡动画后延迟销毁</summary>
+    Dead
 }
 
 /// <summary>小鱼状态机主控 —— 管理巡逻/等待/追击/破坏状态切换</summary>
@@ -28,4 +30,5 @@ public class SmallFishStateMachine
     public bool IsWait() => CurrentState == SmallFishState.Wait;
     public bool IsChase() => CurrentState == SmallFishState.Chase;
     public bool IsBreak() => CurrentState == SmallFishState.Break;
+    public bool IsDead() => CurrentState == SmallFishState.Dead;
 }

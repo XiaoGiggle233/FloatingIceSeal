@@ -138,11 +138,11 @@ public class MineExplosionController : MonoBehaviour
                     new PlayerEventArgs(hit.gameObject));
             }
 
-            // 受气泡保护的小鱼不会被炸死，其余小鱼会被炸死（关卡重置时由 LevelResetSystem 重建）
+            // 受气泡保护的小鱼不会被炸死，其余小鱼死亡（播放死亡动画后延迟销毁，销毁前不参与物理检测）
             var fish = hit.GetComponent<SmallFishController>();
             if (fish != null && !fish.IsProtected())
             {
-                Destroy(fish.gameObject);
+                fish.Die();
             }
 
             // 水雷爆炸会炸掉范围内气泡（蓄力中未释放的气泡由 Burst 内部保护）
