@@ -19,6 +19,8 @@ public enum FlowDirection
 
 public class FlowingWatter : MonoBehaviour
 {
+    private const string ListKey = "FlowingWatterList";
+
     [FoldoutGroup("水流设置", expanded: true)]
     [LabelText("流动方向")]
     [EnumToggleButtons]
@@ -46,12 +48,30 @@ public class FlowingWatter : MonoBehaviour
     {
         GameEvents.Listen(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
         GameEvents.Listen(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
+
+        // 注册到信息池（音效管理等监听 INFO_POOL_EVENT_ON_CHANGE 以判断场景是否存在流动水体）
+        if (!InformationPool.TryGet(ListKey, out List<FlowingWatter> list) || list == null)
+        {
+            list = new List<FlowingWatter>();
+        }
+        if (!list.Contains(this))
+        {
+            list.Add(this);
+        }
+        InformationPool.Set(ListKey, list);
     }
 
     private void OnDisable()
     {
         GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_ENTER, OnCollisionEvent);
         GameEvents.Unlisten(EventType.COLLISION_EVENT_ON_TRIGGER, OnCollisionEvent);
+
+        if (InformationPool.TryGet(ListKey, out List<FlowingWatter> list) && list != null)
+        {
+            list.Remove(this);
+            if (list.Count == 0)
+                InformationPool.Remove(ListKey);
+        }
     }
 
     private void OnCollisionEvent(IGameEvent evt)

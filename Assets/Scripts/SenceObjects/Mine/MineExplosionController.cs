@@ -8,13 +8,15 @@ public struct MineExplosionSettings
     public float explosionRadius;
     public float explosionDelay;
     public float spawnGracePeriod;
+    public float destroyDelay;
 
-    public MineExplosionSettings(float detectRadius, float explosionRadius, float explosionDelay, float spawnGracePeriod)
+    public MineExplosionSettings(float detectRadius, float explosionRadius, float explosionDelay, float spawnGracePeriod, float destroyDelay)
     {
         this.detectRadius = detectRadius;
         this.explosionRadius = explosionRadius;
         this.explosionDelay = explosionDelay;
         this.spawnGracePeriod = spawnGracePeriod;
+        this.destroyDelay = destroyDelay;
     }
 }
 
@@ -40,6 +42,10 @@ public class MineExplosionController : MonoBehaviour
     [LabelText("出生保护时间"), MinValue(0), SuffixLabel("秒", Overlay = true)]
     [SerializeField] private float spawnGracePeriod = 1f;
 
+    [FoldoutGroup("爆炸设置")]
+    [LabelText("爆炸后销毁延迟"), MinValue(0), SuffixLabel("秒", Overlay = true)]
+    [SerializeField] private float destroyDelay = 0.5f;
+
     private bool hasExploded;
     private bool isTriggered;
     private float delayTimer;
@@ -53,7 +59,7 @@ public class MineExplosionController : MonoBehaviour
 
     /// <summary>捕获当前爆炸参数（关卡重置重建后由 LevelResetSystem 还原）</summary>
     public MineExplosionSettings CaptureSettings() =>
-        new MineExplosionSettings(detectRadius, explosionRadius, explosionDelay, spawnGracePeriod);
+        new MineExplosionSettings(detectRadius, explosionRadius, explosionDelay, spawnGracePeriod, destroyDelay);
 
     /// <summary>还原爆炸参数（关卡重置重建后由 LevelResetSystem 调用，同时重新进入出生保护期）</summary>
     public void RestoreSettings(MineExplosionSettings settings)
@@ -62,6 +68,7 @@ public class MineExplosionController : MonoBehaviour
         explosionRadius = settings.explosionRadius;
         explosionDelay = settings.explosionDelay;
         spawnGracePeriod = settings.spawnGracePeriod;
+        destroyDelay = settings.destroyDelay;
         spawnGraceTimer = spawnGracePeriod;
     }
 
@@ -114,6 +121,10 @@ public class MineExplosionController : MonoBehaviour
         if (hasExploded) return;
         hasExploded = true;
 
+        // 发布爆炸事件（音效等监听）
+        GameEvents.Publish(EventType.MINE_EVENT_ON_EXPLODE,
+            new GameStateEventArgs("Exploded"));
+
         // 连锁：爆炸范围内其它水雷引爆
         var chainHits = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
         foreach (var hit in chainHits)
@@ -155,6 +166,19 @@ public class MineExplosionController : MonoBehaviour
                 destroyable.DestroyByExplosion(transform.position, explosionRadius);
         }
 
-        Destroy(gameObject);
+        // 显示爆炸特效（精灵由 MineSpriteController 负责），停止运动与碰撞后延迟销毁
+        var spriteController = GetComponent<MineSpriteController>();
+        if (spriteController != null) spriteController.ShowExplosion();
+
+        var moving = GetComponent<MineMovingController>();
+        if (moving != null) moving.enabled = false;
+
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null) rb.velocity = Vector2.zero;
+
+        var collider = GetComponent<Collider2D>();
+        if (collider != null) collider.enabled = false;
+
+        Destroy(gameObject, destroyDelay);
     }
 }

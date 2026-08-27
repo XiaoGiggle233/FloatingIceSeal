@@ -89,6 +89,12 @@ public enum EventType
     BUBBLE_EVENT_ON_BURST,          // 泡泡破裂
     BUBBLE_EVENT_ON_RELEASE,        // 泡泡释放（蓄力完成）
 
+    // ==================== 小鱼事件 ====================
+    SMALLFISH_EVENT_ON_STATE_CHANGE, // 小鱼状态变化（巡逻/等待/追击/破坏/死亡）
+
+    // ==================== 水雷事件 ====================
+    MINE_EVENT_ON_EXPLODE,          // 水雷爆炸
+
     // ==================== 信息池事件 ====================
     INFO_POOL_EVENT_ON_CHANGE,      // 信息池数据变更
 

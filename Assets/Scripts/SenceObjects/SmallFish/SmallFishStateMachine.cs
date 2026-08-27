@@ -24,6 +24,8 @@ public class SmallFishStateMachine
     {
         if (CurrentState == state) return;
         CurrentState = state;
+        GameEvents.Publish(EventType.SMALLFISH_EVENT_ON_STATE_CHANGE,
+            new GameStateEventArgs(state.ToString()));
     }
 
     public bool IsPatrol() => CurrentState == SmallFishState.Patrol;

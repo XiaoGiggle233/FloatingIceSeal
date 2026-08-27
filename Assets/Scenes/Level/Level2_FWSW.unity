@@ -62448,6 +62448,10 @@ PrefabInstance:
       propertyPath: m_SortingOrder
       value: 11
       objectReference: {fileID: 0}
+    - target: {fileID: 1512687318007829349, guid: 80e8f37e95a2288408fe7556f65e863e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
     - target: {fileID: 2837737539424129844, guid: 80e8f37e95a2288408fe7556f65e863e, type: 3}
       propertyPath: m_Name
       value: Seagrass
