@@ -239,6 +239,7 @@ public class LevelResetSystem : MonoBehaviour
         private readonly SmallFishProtectionSettings? fishProtectionSettings;
         private readonly FloatingIceMovingSettings? floatingIceSettings;
         private readonly WoodBoxBuoyancySettings? woodBoxSettings;
+        private readonly BubbleSettings? bubbleSettings;
         private readonly List<ChildSnapshot> childSnapshots = new List<ChildSnapshot>();
 
         public GameObject Prefab => prefab;
@@ -279,6 +280,10 @@ public class LevelResetSystem : MonoBehaviour
             var woodBox = gameObject.GetComponent<WoodBoxBuoyancyController>();
             woodBoxSettings = woodBox != null
                 ? woodBox.CaptureSettings() : (WoodBoxBuoyancySettings?)null;
+
+            // 场景预置气泡：记录氧气含量等参数（重建后还原 Inspector 覆盖）
+            var bubble = gameObject.GetComponent<BubbleBase>();
+            bubbleSettings = bubble != null ? bubble.CaptureSettings() : (BubbleSettings?)null;
 
             // 记录直接子物体状态（名称、顺序、本地变换、激活），恢复时还原子物体
             for (int i = 0; i < gameObject.transform.childCount; i++)
@@ -359,6 +364,14 @@ public class LevelResetSystem : MonoBehaviour
                 var woodBox = instance.GetComponent<WoodBoxBuoyancyController>();
                 if (woodBox != null)
                     woodBox.RestoreSettings(woodBoxSettings.Value);
+            }
+
+            // 还原气泡氧气含量等参数
+            if (bubbleSettings.HasValue)
+            {
+                var bubble = instance.GetComponent<BubbleBase>();
+                if (bubble != null)
+                    bubble.RestoreSettings(bubbleSettings.Value);
             }
 
             // 还原子物体（prefab 内定义的按名称恢复，场景动态添加的重新挂载）

@@ -3,6 +3,21 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
+/// <summary>气泡参数快照 —— 关卡重置从 prefab 重建后还原场景 Inspector 覆盖值</summary>
+public struct BubbleSettings
+{
+    public float oxygen;
+    public float speed;
+    public float outOfWaterBurstDistance;
+
+    public BubbleSettings(float oxygen, float speed, float outOfWaterBurstDistance)
+    {
+        this.oxygen = oxygen;
+        this.speed = speed;
+        this.outOfWaterBurstDistance = outOfWaterBurstDistance;
+    }
+}
+
 public abstract class BubbleBase : MonoBehaviour, ICollisionEventPublisher
 {
     //储存的氧气
@@ -16,6 +31,18 @@ public abstract class BubbleBase : MonoBehaviour, ICollisionEventPublisher
     //泡泡破裂
     [Button("Burst", ButtonSizes.Large)]
     public abstract void Burst();
+
+    /// <summary>捕获当前气泡参数（关卡重置重建后由 LevelResetSystem 还原）</summary>
+    public BubbleSettings CaptureSettings() =>
+        new BubbleSettings(oxygen, speed, outOfWaterBurstDistance);
+
+    /// <summary>还原气泡参数（关卡重置重建后由 LevelResetSystem 调用）</summary>
+    public void RestoreSettings(BubbleSettings settings)
+    {
+        oxygen = settings.oxygen;
+        speed = settings.speed;
+        outOfWaterBurstDistance = settings.outOfWaterBurstDistance;
+    }
 
     #region 碰撞检测
 
