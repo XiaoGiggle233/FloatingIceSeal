@@ -42,10 +42,10 @@ Material:
     m_Ints: []
     m_Floats:
     - _BlendMode: 1
-    - _Brightness: 1.202
+    - _Brightness: 1.265
     - _EnableExternalAlpha: 0
     - _Opacity: 1
-    - _Saturation: 0.688
+    - _Saturation: 0.633
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Flip: {r: 1, g: 1, b: 1, a: 1}

@@ -15100,6 +15100,14 @@ PrefabInstance:
       propertyPath: m_TileSpriteArray.Array.data[0].m_RefCount
       value: 24
       objectReference: {fileID: 0}
+    - target: {fileID: 5913503101947131184, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.65
+      objectReference: {fileID: 0}
+    - target: {fileID: 5913503101947131184, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.38
+      objectReference: {fileID: 0}
     - target: {fileID: 6465178182398731710, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.87
@@ -15142,7 +15150,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8458210578474161202, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
       propertyPath: m_SortingOrder
-      value: 22
+      value: -1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -2014,8 +2014,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u6309\u4E0Bshift\u8FDB\u884C\u51B2\u523A"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 585de53f6775a534798aab7afd89cbdc, type: 2}
+  m_sharedMaterial: {fileID: 1248645545673564898, guid: 585de53f6775a534798aab7afd89cbdc, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -11561,6 +11561,14 @@ PrefabInstance:
       propertyPath: m_Tiles.Array.data[127].second.m_TileObjectToInstantiateIndex
       value: 65535
       objectReference: {fileID: 0}
+    - target: {fileID: 5913503101947131184, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.43
+      objectReference: {fileID: 0}
+    - target: {fileID: 5913503101947131184, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.33
+      objectReference: {fileID: 0}
     - target: {fileID: 6465178182398731710, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.02
@@ -11603,7 +11611,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8458210578474161202, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
       propertyPath: m_SortingOrder
-      value: 11
+      value: -1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
