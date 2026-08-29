@@ -86,10 +86,6 @@ public class SealCameraFollow : MonoBehaviour
     public CameraOverviewData ActiveOverviewData { get; private set; }
 
     [FoldoutGroup("全览设置")]
-    [SerializeField, LabelText("移动至起始速度"), MinValue(0.01f), SuffixLabel("unit/s", Overlay = true)]
-    public float OverviewStartSpeed = 5f;
-
-    [FoldoutGroup("全览设置")]
     [SerializeField, LabelText("返回角色速度"), MinValue(0.01f), SuffixLabel("unit/s", Overlay = true)]
     public float OverviewReturnSpeed = 5f;
 

@@ -146,7 +146,7 @@ public class CameraOverviewState : CameraStateBase
         switch (cmd.Type)
         {
             case CameraOverviewCommandType.StartPosition:
-                Vector3 startTarget = camera.MoveTo(cmd.StartPosition, camera.OverviewStartSpeed);
+                Vector3 startTarget = camera.MoveTo(cmd.StartPosition, cmd.StartSpeed);
                 // 仅比较 XY，忽略相机与指令位置的 Z 差异
                 if (Vector2.Distance(camera.transform.position, startTarget) < 0.01f)
                     _commandIndex++;

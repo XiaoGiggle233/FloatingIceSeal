@@ -13,6 +13,12 @@ public class CameraOverviewTriggerController : MonoBehaviour
     [SerializeField, LabelText("全览配置")]
     private CameraOverviewData _overviewData = new CameraOverviewData();
 
+    [FoldoutGroup("触发设置", expanded: true)]
+    [SerializeField, ToggleLeft, LabelText("一次性触发"), Tooltip("勾选后仅触发一次，触发后即使关卡重置也不会再次触发")]
+    private bool _isOneTime = true;
+
+    private bool _hasTriggered;
+
     public CameraOverviewData OverviewData => _overviewData;
 
     private void OnEnable()
@@ -31,6 +37,11 @@ public class CameraOverviewTriggerController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.GetComponent<Seal>() == null) return;
+        if (_isOneTime && _hasTriggered) return;
+
         InformationPool.Get<SealCameraFollow>(CameraPoolKey)?.ApplyOverview(_overviewData);
+
+        if (_isOneTime)
+            _hasTriggered = true;
     }
 }

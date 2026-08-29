@@ -24,6 +24,9 @@ public class CameraOverviewCommand
     [SerializeField, LabelText("起始位置"), ShowIf(nameof(_type), CameraOverviewCommandType.StartPosition)]
     private Vector2 _startPosition = Vector2.zero;
 
+    [SerializeField, LabelText("移动速度"), MinValue(0.01f), SuffixLabel("unit/s", Overlay = true), ShowIf(nameof(_type), CameraOverviewCommandType.StartPosition)]
+    private float _startSpeed = 5f;
+
     [Title("方向移动")]
     [SerializeField, LabelText("方向"), ShowIf(nameof(_type), CameraOverviewCommandType.MoveDirection)]
     private Vector2 _moveDirection = Vector2.right;
@@ -42,6 +45,7 @@ public class CameraOverviewCommand
 
     public CameraOverviewCommandType Type => _type;
     public Vector2 StartPosition => _startPosition;
+    public float StartSpeed => _startSpeed;
     public Vector2 MoveDirection => _moveDirection;
     public float MoveDistance => _moveDistance;
     public float MoveSpeed => _moveSpeed;
