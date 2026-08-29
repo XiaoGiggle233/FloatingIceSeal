@@ -84,6 +84,10 @@ public class LevelResetSystem : MonoBehaviour
     {
         if (restorePending) return;
         restorePending = true;
+
+        // 手动重置与死亡恢复汇聚于此，统一发布关卡重置事件（过场动画等模块监听）
+        GameEvents.Publish(EventType.GAME_EVENT_ON_LEVEL_RESET, new GameEventBase());
+
         StartCoroutine(RestoreStateNextFrame());
     }
 

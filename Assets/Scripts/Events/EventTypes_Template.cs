@@ -23,6 +23,7 @@ public enum EventType
     GAME_EVENT_ON_RESUME,           // 游戏恢复
     GAME_EVENT_ON_GAMEOVER,         // 游戏结束
     GAME_EVENT_ON_RESTART,          // 重新开始
+    GAME_EVENT_ON_LEVEL_RESET,      // 关卡重置（手动重置或角色死亡后恢复）
 
     // ==================== 场景/关卡事件 ====================
     SCENE_EVENT_ON_LOADED,          // 场景加载完成
