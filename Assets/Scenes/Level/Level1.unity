@@ -7829,6 +7829,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 519420031}
+    - target: {fileID: 2333035680887395741, guid: 9123fbc306a22204195d14d717c9156e, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 75.85004
+      objectReference: {fileID: 0}
     - target: {fileID: 7085237198414925122, guid: 9123fbc306a22204195d14d717c9156e, type: 3}
       propertyPath: m_Name
       value: PauseCanvas
@@ -7841,10 +7845,10 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 2101580475842213991, guid: 9123fbc306a22204195d14d717c9156e, type: 3}
-      insertIndex: -1
+      insertIndex: 0
       addedObject: {fileID: 1946520315}
     - targetCorrespondingSourceObject: {fileID: 2101580475842213991, guid: 9123fbc306a22204195d14d717c9156e, type: 3}
-      insertIndex: -1
+      insertIndex: 1
       addedObject: {fileID: 1826872485}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9123fbc306a22204195d14d717c9156e, type: 3}
