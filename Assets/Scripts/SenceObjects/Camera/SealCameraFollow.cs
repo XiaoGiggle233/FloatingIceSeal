@@ -161,22 +161,14 @@ public class SealCameraFollow : MonoBehaviour
     }
 
     /// <summary>
-    /// 以指定速度朝向目标匀速移动（带边界钳制）
+    /// 以指定速度朝向目标匀速移动（带边界钳制），返回实际移动目标
     /// </summary>
-    public void MoveTo(Vector3 targetPos, float speed)
+    public Vector3 MoveTo(Vector3 targetPos, float speed)
     {
         targetPos.z = transform.position.z;
         targetPos = ClampWithinBounds(targetPos);
         transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
-    }
-
-    /// <summary>
-    /// 以指定速度朝向目标匀速移动（不做边界钳制，供全览使用）
-    /// </summary>
-    public void MoveToUnclamped(Vector3 targetPos, float speed)
-    {
-        targetPos.z = transform.position.z;
-        transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
+        return targetPos;
     }
 
     public Vector3 ClampWithinBounds(Vector3 pos)

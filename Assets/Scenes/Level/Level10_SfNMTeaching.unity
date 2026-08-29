@@ -1089,7 +1089,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3236511655164903460, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_SortingOrder
-      value: 2
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: detectRadius
@@ -1395,7 +1395,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3236511655164903460, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_SortingOrder
-      value: 4
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: detectRadius
@@ -1674,6 +1674,10 @@ PrefabInstance:
     - target: {fileID: 1234567890123402, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1234567890123403, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
+      propertyPath: m_SortingOrder
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 1234567890123406, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
       propertyPath: moveSpeed
@@ -15704,7 +15708,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5913503101947131184, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.78
+      value: -1.02
       objectReference: {fileID: 0}
     - target: {fileID: 6465178182398731710, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
       propertyPath: m_LocalPosition.x
@@ -15749,6 +15753,10 @@ PrefabInstance:
     - target: {fileID: 8458210578474161202, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
       propertyPath: m_SortingOrder
       value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9072439806716298520, guid: 7966ba6a8a49d9c408d88b879d6e1650, type: 3}
+      propertyPath: m_SortingOrder
+      value: 15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

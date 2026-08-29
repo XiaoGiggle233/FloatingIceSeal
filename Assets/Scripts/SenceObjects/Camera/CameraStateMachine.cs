@@ -128,10 +128,10 @@ public class CameraOverviewState : CameraStateBase
         if (_returning)
         {
             Vector3 playerPos = camera.TargetRb.transform.position;
-            camera.MoveToUnclamped(playerPos, camera.OverviewReturnSpeed);
+            Vector3 target = camera.MoveTo(playerPos, camera.OverviewReturnSpeed);
 
             // 仅比较 XY，忽略相机与角色的 Z 差异
-            if (Vector2.Distance(camera.transform.position, playerPos) < 0.01f)
+            if (Vector2.Distance(camera.transform.position, target) < 0.01f)
                 camera.ReleaseOverview();
             return;
         }
@@ -146,9 +146,9 @@ public class CameraOverviewState : CameraStateBase
         switch (cmd.Type)
         {
             case CameraOverviewCommandType.StartPosition:
-                camera.MoveToUnclamped(cmd.StartPosition, camera.OverviewStartSpeed);
+                Vector3 startTarget = camera.MoveTo(cmd.StartPosition, camera.OverviewStartSpeed);
                 // 仅比较 XY，忽略相机与指令位置的 Z 差异
-                if (Vector2.Distance(camera.transform.position, cmd.StartPosition) < 0.01f)
+                if (Vector2.Distance(camera.transform.position, startTarget) < 0.01f)
                     _commandIndex++;
                 break;
 
@@ -156,10 +156,10 @@ public class CameraOverviewState : CameraStateBase
                 // 进入指令时计算一次固定终点，避免每帧重算导致永远追不上
                 if (!_hasMoveTarget)
                 {
-                    _moveTarget = camera.transform.position + (Vector3)cmd.MoveDirection.normalized * cmd.MoveDistance;
+                    _moveTarget = camera.ClampWithinBounds(camera.transform.position + (Vector3)cmd.MoveDirection.normalized * cmd.MoveDistance);
                     _hasMoveTarget = true;
                 }
-                camera.MoveToUnclamped(_moveTarget, cmd.MoveSpeed);
+                camera.MoveTo(_moveTarget, cmd.MoveSpeed);
                 if (Vector2.Distance(camera.transform.position, _moveTarget) < 0.01f)
                 {
                     _commandIndex++;
