@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Floating Ice Seal](Assets/Screenshots/screenshot-20260818-150930.png)
+![Floating Ice Seal](Assets/Resources/Images/封面.png)
 
 ### 在冰海深处，找到回家的路
 
@@ -26,9 +26,9 @@
 
 ## 游戏预览
 
-| 冰海环境 | 关卡探索 |
-|:---:|:---:|
-| ![冰海环境](Assets/Screenshots/screenshot-20260818-150930.png) | ![关卡探索](Assets/Screenshots/screenshot-20260727-135540.png) |
+| 冰海环境 |
+|:---:|
+| ![冰海环境](Assets/Screenshots/screenshot-20260818-150930.png) |
 
 ## 核心玩法
 
