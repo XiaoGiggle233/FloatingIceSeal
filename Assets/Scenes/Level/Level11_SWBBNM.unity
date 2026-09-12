@@ -1213,7 +1213,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionRadius
-      value: 0.54
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 5212470626652386644, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_LocalScale.x
@@ -17318,7 +17318,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionRadius
-      value: 0.54
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 5212470626652386644, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_LocalScale.x
@@ -23224,7 +23224,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionRadius
-      value: 0.54
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 5212470626652386644, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_LocalScale.x
@@ -23322,7 +23322,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionRadius
-      value: 0.54
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 5212470626652386644, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_LocalScale.x
@@ -24084,7 +24084,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionRadius
-      value: 0.54
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 5212470626652386644, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_LocalScale.x
@@ -24182,7 +24182,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionRadius
-      value: 0.63
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 5212470626652386644, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_LocalScale.x
@@ -35498,7 +35498,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4469930130828117348, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: explosionRadius
-      value: 0.54
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 5212470626652386644, guid: 25093ea3e1099f34e8f8dda0b66569dc, type: 3}
       propertyPath: m_LocalScale.x

@@ -970,7 +970,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8128119179514021180, guid: 76a455da0b6716443af884612180c706, type: 3}
       propertyPath: oxygen
-      value: 32.21
+      value: 45
       objectReference: {fileID: 0}
     - target: {fileID: 4358326289648457490, guid: 76a455da0b6716443af884612180c706, type: 3}
       propertyPath: m_LocalScale.x
