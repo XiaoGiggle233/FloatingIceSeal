@@ -1,8 +1,8 @@
-# Floating Ice Seal
+# 浮冰海豹
 
 <div align="center">
 
-![Floating Ice Seal](Assets/Resources/Images/封面.png)
+![浮冰海豹](Assets/Resources/Images/封面.png)
 
 ### 在冰海深处，找到回家的路
 
